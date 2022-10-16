@@ -29,8 +29,7 @@ def calc_lightlevel(light: int, map, translucence: dict):
                 for voxel in range(0, layers):
                     new_val = lightmap[layer+1][row][voxel] * \
                         (translucence[map[layer+1][row][voxel]]/100)
-                    if new_val > lightmap[layer][row][voxel]:
-                        lightmap[layer][row][voxel] = new_val
+                    lightmap[layer][row][voxel] += new_val
 
     # left
     for layer in range(0, layers):
@@ -42,8 +41,7 @@ def calc_lightlevel(light: int, map, translucence: dict):
                 else:
                     new_val = lightmap[layer][row][voxel-1] * \
                         (translucence[map[layer][row][voxel-1]]/100)
-                    if new_val > lightmap[layer][row][voxel]:
-                        lightmap[layer][row][voxel] = new_val
+                    lightmap[layer][row][voxel] += new_val
 
     # right
     for layer in range(0, layers):
@@ -55,8 +53,7 @@ def calc_lightlevel(light: int, map, translucence: dict):
                 else:
                     new_val = lightmap[layer][row][voxel+1] * \
                         (translucence[map[layer][row][voxel+1]]/100)
-                    if new_val > lightmap[layer][row][voxel]:
-                        lightmap[layer][row][voxel] = new_val
+                    lightmap[layer][row][voxel] += new_val
 
     return lightmap
 
