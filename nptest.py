@@ -2,78 +2,63 @@
 
 import numpy as np
 
-def calc_lightlevel(light:int, map, side:int, translucence:dict):
+
+def calc_lightlevel(light: int, map, translucence: dict):
     layers = len(map)
     lightmap = np.zeros_like(map)
     # front
-    if side == 0:
-        for i in range(0, layers):
-            # 100% light on outer layer
-            if i == 0:
-                lightmap[i] = light
-            # every layer not on the outside
-            else:
-                for j in range(0, layers):
-                    for k in range(0, layers):
-                        if map[i-1][j][k] in translucence:
-                            lightmap[i][j][k] = lightmap[i-1][j][k] * (translucence[map[i-1][j][k]]/100)
-                        else:
-                            return "E01"
+    for layer in range(0, layers):
+        # 100% light on outer layer
+        if layer == 0:
+            lightmap[layer] = light
+        # every layer not on the outside
+        else:
+            for row in range(0, layers):
+                for voxel in range(0, layers):
+                    lightmap[layer][row][voxel] = lightmap[layer-1][row][voxel] * \
+                        (translucence[map[layer-1][row][voxel]]/100)
 
     # back
-    elif side == 1:
-        for i in range(layers-1, -1, -1):
-            # 100% light on outer layer
-            if i == layers-1:
-                lightmap[i] = light
-            else:
-                # every layer not on the outside
-                for j in range(0, layers):
-                    for k in range(0, layers):
-                        if map[i+1][j][k] in translucence:
-                            new_val = lightmap[i+1][j][k] * (translucence[map[i+1][j][k]]/100)
-                            if new_val > lightmap[i][j][k]:
-                                lightmap[i][j][k] = new_val
-                        else:
-                            return "E01"
+    for layer in range(layers-1, -1, -1):
+        # 100% light on outer layer
+        if layer == layers-1:
+            lightmap[layer] = light
+        else:
+            # every layer not on the outside
+            for row in range(0, layers):
+                for voxel in range(0, layers):
+                    new_val = lightmap[layer+1][row][voxel] * \
+                        (translucence[map[layer+1][row][voxel]]/100)
+                    if new_val > lightmap[layer][row][voxel]:
+                        lightmap[layer][row][voxel] = new_val
 
     # left
-    elif side == 2:
-        for i in range(0, layers):
-            for j in range(0, layers):
-                for k in range(0, layers):
-                    # 100% light on outer layer
-                    if k == 0:
-                        lightmap[i][j][k] = light
-                    else:
-                        if map[i][j][k-1] in translucence:
-                            new_val = lightmap[i][j][k-1] * (translucence[map[i][j][k-1]]/100)
-                            if new_val > lightmap[i][j][k]:
-                                lightmap[i][j][k] = new_val
-                        else:
-                            return "E01"
+    for layer in range(0, layers):
+        for row in range(0, layers):
+            for voxel in range(0, layers):
+                # 100% light on outer layer
+                if voxel == 0:
+                    lightmap[layer][row][voxel] = light
+                else:
+                    new_val = lightmap[layer][row][voxel-1] * \
+                        (translucence[map[layer][row][voxel-1]]/100)
+                    if new_val > lightmap[layer][row][voxel]:
+                        lightmap[layer][row][voxel] = new_val
 
     # right
-    elif side == 3:
-        for i in range(0, layers):
-            for j in range(0, layers):
-                for k in range(layers-1, -1, -1):
-                    # 100% light on outer layer
-                    if k == 7:
-                        lightmap[i][j][k] = light
-                    else:
-                        if map[i][j][k+1] in translucence:
-                            new_val = lightmap[i][j][k+1] * (translucence[map[i][j][k+1]]/100)
-                            if new_val > lightmap[i][j][k]:
-                                lightmap[i][j][k] = new_val
-                        else:
-                            return "E01"
-
+    for layer in range(0, layers):
+        for row in range(0, layers):
+            for voxel in range(layers-1, -1, -1):
+                # 100% light on outer layer
+                if voxel == 7:
+                    lightmap[layer][row][voxel] = light
+                else:
+                    new_val = lightmap[layer][row][voxel+1] * \
+                        (translucence[map[layer][row][voxel+1]]/100)
+                    if new_val > lightmap[layer][row][voxel]:
+                        lightmap[layer][row][voxel] = new_val
 
     return lightmap
-
-# air, not solid, solid
-v_types = [[0,100],[1,50],[2,0]]
 
 
 np_map = np.zeros((8, 8, 8))
@@ -84,6 +69,8 @@ np_map[0][4][6] = 1
 np_map[1][2][5] = 1
 np_map[3][1][7] = 1
 
+# material id, light modifier
+# air, non-solid, solid
 t_dict = {
     0: 100,
     1: 50,
@@ -92,10 +79,6 @@ t_dict = {
 
 # print(np_map)
 # input()
-print(calc_lightlevel(100, np_map, 3, t_dict))
-
-# Error:
-# 0 = Error with light calc
-#   1 = Material in given map doesn't exist
+print(calc_lightlevel(100, np_map, t_dict))
 
 # TODO: calc light from top
