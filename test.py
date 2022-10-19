@@ -7,6 +7,7 @@ np_map[0][1][1] = 4
 np_map[0][2][2] = 4
 np_map[0][3][3] = 4
 
+
 def search_arr(arr: list, query):
     locationarr = np.where(np_map == 4)
     li = []

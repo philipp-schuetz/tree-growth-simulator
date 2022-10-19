@@ -55,6 +55,8 @@ def calc_lightlevel(light: int, map, translucence: dict):
                         (translucence[map[layer][row][voxel+1]]/100)
                     lightmap[layer][row][voxel] += new_val
 
+    # # top
+    # for layer in range(0, layers):
     return lightmap
 
 
