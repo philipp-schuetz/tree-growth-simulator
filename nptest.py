@@ -1,6 +1,5 @@
-#!/usr/local/bin python3.9
-
 import numpy as np
+from modules import functions
 
 
 def calc_lightlevel(light: int, map, translucence: dict):
@@ -60,13 +59,8 @@ def calc_lightlevel(light: int, map, translucence: dict):
     return lightmap
 
 
-np_map = np.zeros((8, 8, 8))
-
-np_map[0][1][7] = 1
-np_map[0][2][7] = 1
-np_map[0][4][6] = 1
-np_map[1][2][5] = 1
-np_map[3][1][7] = 1
+# np_map = np.zeros((8, 8, 8))
+np_map = np.zeros((25, 50, 25))
 
 # material id, light modifier
 # air, non-solid, solid
@@ -76,8 +70,11 @@ t_dict = {
     2: 0
 }
 
-# print(np_map)
-# input()
-print(calc_lightlevel(100, np_map, t_dict))
+lightarr = calc_lightlevel(100, np_map, t_dict)
 
 # TODO: calc light from top
+
+
+functions.model_minecraft(lightarr)
+
+np.arange()
