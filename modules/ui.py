@@ -12,7 +12,7 @@ class Ui:
         # add light slider
         self.val_light = IntVar()
         self.s1 = Scale(frame, from_=0, to=400, orient=HORIZONTAL,
-                        digits=0, label="Water in %", variable=self.val_light).grid(column=0, row=1)
+                        digits=0, label="Light in %", variable=self.val_light).grid(column=0, row=0)
         # set to standard value
         self.val_light.set(100)
 
@@ -26,14 +26,14 @@ class Ui:
         # add temperature slider
         self.val_temp = IntVar()
         self.s3 = Scale(frame, from_=0, to=400, orient=HORIZONTAL,
-                        digits=0, label="Water in %", variable=self.val_temp).grid(column=0, row=1)
+                        digits=0, label="Temperature in %", variable=self.val_temp).grid(column=0, row=2)
         # set to standard value
         self.val_temp.set(100)
         
         # add nutrients slider
         self.val_nutrients = IntVar()
         self.s4 = Scale(frame, from_=0, to=400, orient=HORIZONTAL,
-                        digits=0, label="Water in %", variable=self.val_nutrients).grid(column=0, row=1)
+                        digits=0, label="Nutrients in %", variable=self.val_nutrients).grid(column=0, row=3)
         # set to standard value
         self.val_nutrients.set(100)
 
