@@ -1,7 +1,9 @@
+"""Module contains the Config class."""
 import json
 from pathlib import Path
 
 class Config():
+    """holds the default configuration and methods to interact with the config file"""
     def __init__(self):
         # path to config file
         self.path = Path('config.json')
@@ -34,21 +36,21 @@ class Config():
         if not self.path.is_file():
             self.create_file()
 
-    
+
     def create_file(self):
         """create config file if it not already exists"""
-        with open(self.path, 'w', encoding='UTF-8') as f:
-            json.dump(self.base, f)
+        with open(self.path, 'w', encoding='UTF-8') as file:
+            json.dump(self.base, file)
 
     def load(self):
         """load config dictionary from file"""
-        with open(self.path, 'r', encoding='UTF-8') as f:
-            self.config = json.load(f)
-    
+        with open(self.path, 'r', encoding='UTF-8') as file:
+            self.config = json.load(file)
+
     def save(self):
         """save config dictionary to file"""
-        with open(self.path, 'w', encoding='UTF-8') as f:
-            json.dump(self.config, f)
+        with open(self.path, 'w', encoding='UTF-8') as file:
+            json.dump(self.config, file)
 
 
     def get_material_id(self) ->  dict[str, int]:

@@ -1,17 +1,13 @@
-import numpy as np
-from .ui import Ui
-from .model import Model
-from .light import Light
-from .config import Config
-
-# TODO: move light object to model, calculate after every set voxel
+"""Module contains the App class."""
+from ui import Ui
+from model import Model
 
 class App:
+    """App contains ui, model and light objects and the mainloop of this application"""
     def __init__(self):
         self.ui = Ui()
-        self.model = Model('self.config')
+        self.model = Model()
         self.model.set_dimensions(500, 250)
-        self.light = Light('self.model.model')
 
     def run(self):
         """run main event loop"""
