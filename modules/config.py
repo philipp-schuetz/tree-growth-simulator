@@ -1,4 +1,5 @@
 """Module contains the Config class."""
+from abc import abstractproperty
 import json
 from pathlib import Path
 
@@ -26,6 +27,10 @@ class Config():
                 "wood": 0,
                 "leaf": 50,
                 "wall": 0
+            },
+            "model_dimensions": {
+                "width": 250,
+                "height": 500
             }
         }
 
@@ -67,3 +72,8 @@ class Config():
         """return the material translucency in percent from the config"""
         self.load()
         return self.config['material_translucency']
+
+    def get_model_dimensions(self) -> dict[str, int]:
+        """return model dimensions (width, height)"""
+        self.load()
+        return self.config['model_dimensions']
