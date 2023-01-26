@@ -1,6 +1,6 @@
-import modules
+from modules.app import App
 
-app = modules.App()
+app = App()
 
 if __name__ == "__main__":
     app.run()
