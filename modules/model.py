@@ -1,13 +1,14 @@
 import numpy as np
 import anvil
-from config import Config
-from light import Light
+import modules.config as config
+import modules.light as light
 from PIL import Image, ImageDraw
+from pathlib import Path
 
 class Model:
     def __init__(self):
-        self.config = Config()
-        self.light = Light('self.model.model')
+        self.config = config.Config()
+        self.light = light.Light('self.model.model')
 
         # create variable for model dimensions and set them with config
         self.width = 0
@@ -99,6 +100,12 @@ class Model:
             # reset visible
             visible = np.zeros((self.height, self.width))
             
+            
+            # check if output path exists, otherwise create
+            out_dir = Path('images')
+            if not out_dir.is_dir():
+                out_dir.mkdir(parents=True, exist_ok=True)
+
             # save image to file
             image.save('images/'+side+'.png')
 
