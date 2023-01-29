@@ -1,20 +1,35 @@
 import numpy as np
 import anvil
+from config import Config
 from light import Light
 from PIL import Image, ImageDraw
 
 class Model:
     def __init__(self):
+        self.config = Config()
         self.light = Light('self.model.model')
-        self.height = 0
+
+        # create variable for model dimensions and set them with config
         self.width = 0
+        self.height = 0
         self.set_dimensions()
+
+        # get material ids from config
+        ids = self.config.get_material_id()
+        self.id_air = ids['air']
+        self.id_leaf = ids['leaf']
+        self.id_wood = ids['wood']
+        self.id_wall = ids['wall']
+
+        # create array for tree model
         self.model = np.zeros((self.width, self.height, self.width))
 
     # TODO: set dimension through config file
     def set_dimensions(self):
-        'height and width must be in a 2:1 ratio'
-        pass
+        'fetch and set model dimensions from config file'
+        dimensions = self.config.get_model_dimensions()
+        self.width = dimensions['width']
+        self.height = dimensions['height']
 
     def save(self):
         """save model in file"""
@@ -24,16 +39,12 @@ class Model:
         """load lightarray from file"""
         self.model = np.load('../saves/lightarr.npy')
 
-    def replace_with_air(self, material: str):
-        if material not in self.config["materials"]:
-            return
-        for layer in range(0, self.width):
-            for row in range(0, self.height):
-                for voxel in range(0, self.width):
-                    if self.model[layer][row][voxel] == self.config["materials"]["material"]:
-                        self.model[layer][row][voxel] = self.config["materials"]["air"]
-
     def generate_images(self):
+        # get colors from config
+        colors = self.config.get_material_color()
+        color_leaf = tuple(colors['leaf'])
+        color_wood = tuple(colors['wood'])
+
         sides = ['front', 'back', 'left', 'right']
         for side in sides:
             image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
@@ -48,7 +59,7 @@ class Model:
                     for row in range(0, self.height):
                         for voxel in range(0, self.width):
                             # there is no voxel set, set new one 
-                            if visible[row,voxel] == 0:
+                            if visible[row,voxel] == self.id_air:
                                 visible[row,voxel] = self.model[layer,row,voxel]
                 
             if side == 'back':
@@ -57,7 +68,7 @@ class Model:
                     for row in range(0, self.height):
                         for voxel in range(0, self.width):
                             # there is no voxel set, set new one 
-                            if visible[row,-voxel-1] == 0:
+                            if visible[row,-voxel-1] == self.id_air:
                                 # 'mirror' voxel value, because of iteration from back
                                 visible[row,-voxel-1] = self.model[layer,row,voxel]
 
@@ -66,7 +77,7 @@ class Model:
                     for row in range(0, self.height):
                         for voxel in range(0, self.width):
                             # if visible empty on this index, set to current voxel
-                            if visible[row,self.width-(layer+1)] == 0:
+                            if visible[row,self.width-(layer+1)] == self.id_air:
                                 visible[row,self.width-(layer+1)] = self.model[layer,row,voxel]
 
             if side == 'right':
@@ -75,16 +86,15 @@ class Model:
                         for voxel in range(0, self.width):
                             # if visible empty on this index, set to current voxel
                             to_mirror = self.width-(layer+1)
-                            if visible[row,-to_mirror-1] == 0:
+                            if visible[row,-to_mirror-1] == self.id_air:
                                 visible[row,-to_mirror-1] = self.model[layer,row,voxel]
 
-            # TODO: get material ids from config file
             # iterate through visible voxels and add them to image
             for row in range(0, self.height):
                 for voxel in range(0, self.width):
-                    if visible[row,voxel] == 1:
+                    if visible[row,voxel] == self.id_leaf:
                         d.rectangle(((voxel, row), (voxel, row)), color_leaf)
-                    elif visible[row,voxel] == 2:
+                    elif visible[row,voxel] == self.id_wood:
                         d.rectangle(((voxel, row), (voxel, row)), color_wood)
             # reset visible
             visible = np.zeros((self.height, self.width))
