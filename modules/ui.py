@@ -40,7 +40,7 @@ class Ui:
             case 'Start':
                 pass
             case 'Export to PNGs':
-                pass
+                return 'export'
             case sg.WIN_CLOSED:
                 self.close_window()
 
