@@ -40,6 +40,7 @@ class Ui:
             case 'Start':
                 pass
             case 'Export to PNGs':
+                sg.popup('Please be patient while the images are generated.', title='Export to PNGs')
                 return 'export'
             case sg.WIN_CLOSED:
                 self.close_window()
