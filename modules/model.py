@@ -8,7 +8,7 @@ from pathlib import Path
 class Model:
     def __init__(self):
         self.config = config.Config()
-        self.light = light.Light('self.model.model')
+        self.light = light.Light()
 
         # create variable for model dimensions and set them with config
         self.width = 0
@@ -25,7 +25,6 @@ class Model:
         # create array for tree model
         self.model = np.zeros((self.width, self.height, self.width))
 
-    # TODO: set dimension through config file
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
         dimensions = self.config.get_model_dimensions()
