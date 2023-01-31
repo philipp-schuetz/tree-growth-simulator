@@ -14,6 +14,11 @@ class App:
         while self.ui.window_status == 1:
             match self.ui.handle_window():
                 case 'start':
-                    pass
+                    self.model.set_modifiers(
+                        self.ui.get_light(),
+                        self.ui.get_water(),
+                        self.ui.get_temperature(),
+                        self.ui.get_nutrients()
+                    )
                 case 'export':
                     self.model.generate_images()

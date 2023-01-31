@@ -1,28 +1,40 @@
 import numpy as np
-from typing import Union
-
+import modules.config as config
+# TODO: finish light calculation
 
 class Light:
-    def __init__(self, modelarray):
-        self.translucence = {
-            0: 100,
-            1: 50,
-            2: 0
-        }
-        self.lightarray = np.zeros_like(modelarray)
-        self.layers = len(modelarray)
+    def __init__(self):
+        self.config = config.Config()
+        # {0: 100, 1: 0, 2: 50, 3: 0}
+        self.translucency = {}
+        self.set_translucency()
 
+        # create variable for light model dimensions and set them with config
+        self.width = -1
+        self.height = -1
+        self.set_dimensions()
 
-def calculate(self, baselight: Union[int, tuple[int, int, int, int, int]]):
-    """calculates the lightvalue for each voxel"""
-    return
+        self.lightarray = np.zeros((self.width, self.height, self.width))
 
+        self.lightlevel = -1
 
-def save_arr(self):
-    """save lightarray in file"""
-    np.save('./saves/lightarr.npy', self.lightarray)
+    def set_translucency(self):
+        ids = self.config.get_material_id()
+        translucency = self.config.get_material_translucency()
+        for id in ids.keys():
+            self.translucency[ids[id]] = translucency[id]
+        print(self.translucency)
 
+    def set_dimensions(self):
+        'fetch and set model dimensions from config file'
+        dimensions = self.config.get_model_dimensions()
+        self.width = dimensions['width']
+        self.height = dimensions['height']
 
-def load_arr():
-    """load lightarray from file"""
-    return np.load('./saves/lightarr.npy')
+    def set_light(self, light):
+        """set inital lightlevel from ui"""
+        self.lightlevel = light
+
+    def calculate(self, baselight:int):
+        """calculates the lightvalue for each voxel"""
+        return
