@@ -11,8 +11,8 @@ class Model:
         self.light = light.Light()
 
         # create variable for model dimensions and set them with config
-        self.width = 0
-        self.height = 0
+        self.width = -1
+        self.height = -1
         self.set_dimensions()
 
         # get material ids from config
@@ -25,11 +25,25 @@ class Model:
         # create array for tree model
         self.model = np.zeros((self.width, self.height, self.width))
 
+        # modifiers
+        self.water = -1
+        self.temperature = -1
+        self.nutrients = -1
+
+
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
         dimensions = self.config.get_model_dimensions()
         self.width = dimensions['width']
         self.height = dimensions['height']
+    
+    def set_modifiers(self, light:int, water:int, temperature:int, nutrients:int):
+        """set modifiers from ui"""
+        self.water = water
+        self.temperature = temperature
+        self.nutrients = nutrients
+
+        self.light.set_light(light)
 
     def save(self):
         """save model in file"""

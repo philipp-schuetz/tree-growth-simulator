@@ -10,13 +10,13 @@ class Light:
         self.set_translucency()
 
         # create variable for light model dimensions and set them with config
-        self.width = 0
-        self.height = 0
+        self.width = -1
+        self.height = -1
         self.set_dimensions()
 
         self.lightarray = np.zeros((self.width, self.height, self.width))
 
-        # get light value from ui
+        self.lightlevel = -1
 
     def set_translucency(self):
         ids = self.config.get_material_id()
@@ -30,6 +30,10 @@ class Light:
         dimensions = self.config.get_model_dimensions()
         self.width = dimensions['width']
         self.height = dimensions['height']
+
+    def set_light(self, light):
+        """set inital lightlevel from ui"""
+        self.lightlevel = light
 
     def calculate(self, baselight:int):
         """calculates the lightvalue for each voxel"""
