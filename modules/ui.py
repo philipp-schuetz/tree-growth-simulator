@@ -14,7 +14,7 @@ class Ui:
         # set ui theme
         sg.theme('DarkBlue')
 
-        # define ui layout, 
+        # define ui layout 
         self.layout = [
             [sg.Frame(title='Modifiers', layout=[
                 [sg.Text('Light in %'), sg.Slider(range=(0,200), default_value=100, key='light', orientation='horizontal')],
@@ -40,7 +40,7 @@ class Ui:
             case 'Start':
                 pass
             case 'Export to PNGs':
-                sg.popup('Please be patient while the images are generated.', title='Export to PNGs')
+                sg.popup('Please be patient while the images are being generated.', title='Export to PNGs')
                 return 'export'
             case sg.WIN_CLOSED:
                 self.close_window()
