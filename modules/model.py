@@ -8,8 +8,6 @@ from pathlib import Path
 class Model:
     def __init__(self):
         self.config = config.Config()
-        self.light = light.Light()
-
         # create variable for model dimensions and set them with config
         self.width = -1
         self.height = -1
@@ -30,6 +28,17 @@ class Model:
         self.temperature = -1
         self.nutrients = -1
 
+        self.light = light.Light(self.model)
+
+    def set_light_sides(self, sides: list[bool]):
+        """format of sides: [front, back, left, right, top]"""
+        self.light.activated_sides = ['front','back','left','right','top']
+        to_remove = []
+        for i in range(0, len(sides)):
+            if not sides[i]:
+                to_remove.append(self.light.activated_sides[i])
+        for item in to_remove:
+            self.light.activated_sides.remove(item)
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'

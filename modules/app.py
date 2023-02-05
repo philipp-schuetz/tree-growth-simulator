@@ -20,5 +20,6 @@ class App:
                         self.ui.get_temperature(),
                         self.ui.get_nutrients()
                     )
+                    self.model.set_light_sides(self.ui.get_light_sides())
                 case 'export':
                     self.model.generate_images()

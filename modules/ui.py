@@ -11,6 +11,8 @@ class Ui:
         self.value_temperature = -1
         self.value_nutrients = -1
 
+        self.values_light_sides = [False, False, False, False, False]
+
         # set ui theme
         sg.theme('DarkBlue')
 
@@ -18,6 +20,7 @@ class Ui:
         self.layout = [
             [sg.Frame(title='Modifiers', layout=[
                 [sg.Text('Light in %'), sg.Slider(range=(0,200), default_value=100, key='light', orientation='horizontal')],
+                [sg.Checkbox('front', default=True, key='front'),sg.Checkbox('back', default=True, key='back'),sg.Checkbox('left', default=True, key='left'),sg.Checkbox('right', default=True, key='right'),sg.Checkbox('top', default=True, key='top')],
                 [sg.Text('Water in %'), sg.Slider(range=(0,200), default_value=100, key='water', orientation='horizontal')],
                 [sg.Text('Temperature in %'), sg.Slider(range=(0,200), default_value=100, key='temperature', orientation='horizontal')],
                 [sg.Text('Nutrients in %'), sg.Slider(range=(0,200), default_value=100, key='nutrients', orientation='horizontal')]
@@ -38,18 +41,20 @@ class Ui:
         # check for events
         match event:
             case 'Start':
-                pass
+                # save values
+                self.value_light = values['light']
+                self.value_water = values['water']
+                self.value_temperature = values['temperature']
+                self.value_nutrients = values['nutrients']
+
+                self.values_light_sides = [values['front'], values['back'],values['left'], values['right'], values['top']]
+                
+                return 'start'
             case 'Export to PNGs':
                 sg.popup('Please be patient while the images are being generated.', title='Export to PNGs')
                 return 'export'
             case sg.WIN_CLOSED:
                 self.close_window()
-
-        # save values
-        self.value_light = values['light']
-        self.value_water = values['water']
-        self.value_temperature = values['temperature']
-        self.value_nutrients = values['nutrients']
 
     def close_window(self):
         self.window.close()
@@ -57,6 +62,9 @@ class Ui:
 
     def get_light(self):
         return self.value_light
+    
+    def get_light_sides(self) -> list[bool]:
+        return self.values_light_sides
 
     def get_water(self):
         return self.value_water

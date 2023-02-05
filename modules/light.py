@@ -18,12 +18,13 @@ class Light:
 
         self.lightlevel = -1
 
+        self.activated_sides = ['front','back','left','right','top']
+
     def set_translucency(self):
         ids = self.config.get_material_id()
         translucency = self.config.get_material_translucency()
         for id in ids.keys():
             self.translucency[ids[id]] = translucency[id]
-        print(self.translucency)
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
@@ -40,10 +41,7 @@ class Light:
         only one lightvalue is calculated per voxel\n
         the value calculated refers to the side most close to the models edge"""
 
-        # sides = ['front','back','left','right','top']
-        sides = {'front':100,'back':100,'left':100,'right':100,'top':100}
-
-        for side in sides:
+        for side in self.activated_sides: # front is finished, TODO: all other sides
             if side == 'front':
                 # iterate through map and add visible voxels to array
                 for layer in range(0, self.width):
@@ -54,10 +52,8 @@ class Light:
                                 self.lightarray[layer,row,voxel] = self.lightlevel
                             else:
                                 # calculate new light value and add it to light array
-
                                 light_back = self.lightarray[layer-1,row,voxel]
                                 translucency_back = self.translucency[model[layer-1,row,voxel]]
-
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
             if side == 'back':
