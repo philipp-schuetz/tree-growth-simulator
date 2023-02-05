@@ -14,6 +14,7 @@ class Light:
         self.height = -1
         self.set_dimensions()
 
+        self.model = model
         self.lightarray = np.zeros((self.width, self.height, self.width))
 
         self.lightlevel = -1
@@ -36,12 +37,12 @@ class Light:
         """set inital lightlevel from ui"""
         self.lightlevel = light
 
-    def calculate(self, model):
+    def calculate(self):
         """calculates the lightvalue for each voxel \n
         only one lightvalue is calculated per voxel\n
         the value calculated refers to the side most close to the models edge"""
 
-        for side in self.activated_sides: # front is finished, TODO: all other sides
+        for side in self.activated_sides:
             if side == 'front':
                 # iterate through map and add visible voxels to array
                 for layer in range(0, self.width):
@@ -53,10 +54,10 @@ class Light:
                             else:
                                 # calculate new light value and add it to light array
                                 light_back = self.lightarray[layer-1,row,voxel]
-                                translucency_back = self.translucency[model[layer-1,row,voxel]]
+                                translucency_back = self.translucency[self.model[layer-1,row,voxel]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
-            if side == 'back':
+            elif side == 'back':
                 # iterate through map and add visible voxels to array
                 for layer in range(self.width-1,-1,-1):
                     for row in range(0, self.height):
@@ -64,23 +65,47 @@ class Light:
                             # set outer layer of voxels to initital light level
                             if layer == self.width-1:
                                 self.lightarray[layer,row,voxel] = self.lightlevel
-                            # get light value of last voxel, reduce it and add to lightarray
-                            self.lightarray[layer,row,voxel]
+                            else:
+                                # calculate new light value and add it to light array
+                                light_back = self.lightarray[layer+1,row,voxel]
+                                translucency_back = self.translucency[self.model[layer+1,row,voxel]]
+                                self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
-            if side == 'left': # calculation correct?
+            elif side == 'left':
                 for layer in range(0, self.width):
                     for row in range(0, self.height):
                         for voxel in range(0, self.width):
-                            # get light value of last voxel, reduce it and add to lightarray
-                            self.lightarray[layer,row,voxel]
+                            # set outer layer of voxels to initital light level
+                            if voxel == 0:
+                                self.lightarray[layer,row,voxel] = self.lightlevel
+                            else:
+                                # calculate new light value and add it to light array
+                                light_back = self.lightarray[layer,row,voxel-1]
+                                translucency_back = self.translucency[self.model[layer,row,voxel-1]]
+                                self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
+            elif side == 'right':
+                for layer in range(0, self.width):
+                    for row in range(0, self.height):
+                        for voxel in range(self.width-1,-1,-1):
+                            # set outer layer of voxels to initital light level
+                            if voxel == self.width-1:
+                                self.lightarray[layer,row,voxel] = self.lightlevel
+                            else:
+                                # calculate new light value and add it to light array
+                                light_back = self.lightarray[layer,row,voxel+1]
+                                translucency_back = self.translucency[self.model[layer,row,voxel+1]]
+                                self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
-                            # if visible[row,self.width-(layer+1)] == self.id_air:
-                            #     visible[row,self.width-(layer+1)] = self.model[layer,row,voxel]
-
-            if side == 'right':
-                for layer in range(self.width-1,-1,-1):
+            elif side == 'top':
+                for layer in range(0, self.width):
                     for row in range(0, self.height):
                         for voxel in range(0, self.width):
-                            # get light value of last voxel, reduce it and add to lightarray
-                            self.lightarray[layer,row,voxel]
+                            # set outer layer of voxels to initital light level
+                            if row == 0:
+                                self.lightarray[layer,row,voxel] = self.lightlevel
+                            else:
+                                # calculate new light value and add it to light array
+                                light_back = self.lightarray[layer,row-1,voxel]
+                                translucency_back = self.translucency[self.model[layer,row-1,voxel]]
+                                self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
