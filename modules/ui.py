@@ -56,21 +56,21 @@ class Ui:
             case sg.WIN_CLOSED:
                 self.close_window()
 
-    def close_window(self):
+    def close_window(self) -> None:
         self.window.close()
         self.window_status = 0
 
-    def get_light(self):
+    def get_light(self) -> int:
         return self.value_light
     
     def get_light_sides(self) -> list[bool]:
         return self.values_light_sides
 
-    def get_water(self):
+    def get_water(self) -> int:
         return self.value_water
 
-    def get_temperature(self):
+    def get_temperature(self) -> int:
         return self.value_temperature
 
-    def get_nutrients(self):
+    def get_nutrients(self) -> int:
         return self.value_nutrients
