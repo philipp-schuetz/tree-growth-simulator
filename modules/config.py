@@ -27,6 +27,15 @@ base = {
     "model_dimensions": {
         "width": 250,
         "height": 500
+    },
+    "l_system": {
+        "iterations": 4,
+        "start": "X",
+        "angle": 25,
+        "rules": [
+            {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
+            {"letter": "F", "new_letters": "FF"}
+        ]
     }
 }
 
