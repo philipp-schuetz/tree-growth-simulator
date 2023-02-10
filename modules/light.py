@@ -3,7 +3,6 @@ import modules.config as config
 
 class Light:
     def __init__(self, model):
-        self.config = config.Config()
         # {0: 100, 1: 0, 2: 50, 3: 0}
         self.translucency = {}
         self.set_translucency()
@@ -23,14 +22,14 @@ class Light:
     def set_translucency(self):
         """combine material ids and material translucency from config file
         into translucency dictionary"""
-        ids = self.config.get_material_id()
-        translucency = self.config.get_material_translucency()
+        ids = config.get_material_id()
+        translucency = config.get_material_translucency()
         for id in ids.keys():
             self.translucency[ids[id]] = translucency[id]
 
     def set_dimensions(self):
         """fetch and set model dimensions from config file"""
-        dimensions = self.config.get_model_dimensions()
+        dimensions = config.get_model_dimensions()
         self.width = dimensions['width']
         self.height = dimensions['height']
 

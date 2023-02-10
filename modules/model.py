@@ -7,14 +7,13 @@ from pathlib import Path
 
 class Model:
     def __init__(self):
-        self.config = config.Config()
         # create variable for model dimensions and set them with config
         self.width = -1
         self.height = -1
         self.set_dimensions()
 
         # get material ids from config
-        ids = self.config.get_material_id()
+        ids = config.get_material_id()
         self.id_air = ids['air']
         self.id_leaf = ids['leaf']
         self.id_wood = ids['wood']
@@ -42,7 +41,7 @@ class Model:
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
-        dimensions = self.config.get_model_dimensions()
+        dimensions = config.get_model_dimensions()
         self.width = dimensions['width']
         self.height = dimensions['height']
     
@@ -64,7 +63,7 @@ class Model:
 
     def generate_images(self):
         # get colors from config
-        colors = self.config.get_material_color()
+        colors = config.get_material_color()
         color_leaf = tuple(colors['leaf'])
         color_wood = tuple(colors['wood'])
 
