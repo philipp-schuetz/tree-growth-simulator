@@ -109,6 +109,45 @@ def get_model_dimensions() -> dict[str, int]:
     else:
         return config['model_dimensions']
 
+def get_iterations() -> int:
+    """return l-system iteration count"""
+    load()
+    iterations = config['l_system']['iterations']
+
+    # data validation
+    if not isinstance(iterations, int):
+        raise ValueError('iterations must be an integer')
+    elif iterations < 1:
+        raise ValueError('iterations must be at least 1')
+    else:
+        return iterations
+
+def get_start_letter() -> str:
+    """return start letter for l-system"""
+    load()
+    start = config['l_system']['start']
+
+    # data validation
+    if not isinstance(start, str):
+        raise ValueError('start must be a string')
+    else:
+        return start
+    
+def get_rules() -> list[dict[str,str]]:
+    """return rules for l-system"""
+    load()
+    rules = config['l_system']['rules']
+
+    # data validation
+    for rule in rules:
+        if not isinstance(rule['letter'], str):
+            raise ValueError('letter must be a string')
+        elif len(rule['letter']) > 1:
+            raise ValueError('letter must be a single character')
+        elif not isinstance(rule['new_letters'], str):
+            raise ValueError('new_letters must be a string')
+    return rules
+
 def init_config():
     # create config file with default values, if it does not exist
     if not path.is_file():
