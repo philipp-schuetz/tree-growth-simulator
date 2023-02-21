@@ -2,153 +2,158 @@
 import json
 from pathlib import Path
 
-# path to config file
-path = Path('config.json')
+class Config():
+    def __init__(self) -> None:
+        # path to config file
+        self.path = Path('config.json')
 
-# default configuration
-base = {
-    "material_id": {
-        "air": 0,
-        "wood": 1,
-        "leaf": 2,
-        "wall": 3
-    },
-    "material_color": {
-        "wood": [139, 69, 19],
-        "leaf": [0, 128, 0],
-        "wall": [0, 0, 0]
-    },
-    "material_translucency": {
-        "air": 100,
-        "wood": 0,
-        "leaf": 50,
-        "wall": 0
-    },
-    "model_dimensions": {
-        "width": 250,
-        "height": 500
-    },
-    "l_system": {
-        "iterations": 4,
-        "start": "X",
-        "angle": 25,
-        "rules": [
-            {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
-            {"letter": "F", "new_letters": "FF"}
-        ]
-    }
-}
+        # default configuration
+        self.base = {
+            "material_id": {
+                "air": 0,
+                "wood": 1,
+                "leaf": 2,
+                "wall": 3
+            },
+            "material_color": {
+                "wood": [139, 69, 19],
+                "leaf": [0, 128, 0],
+                "wall": [0, 0, 0]
+            },
+            "material_translucency": {
+                "air": 100,
+                "wood": 0,
+                "leaf": 50,
+                "wall": 0
+            },
+            "model_dimensions": {
+                "width": 250,
+                "height": 500
+            },
+            "l_system": {
+                "iterations": 4,
+                "start": "X",
+                "angle": 25,
+                "rules": [
+                    {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
+                    {"letter": "F", "new_letters": "FF"}
+                ]
+            }
+        }
 
-# holds config loaded from file
-config = {}
+        # holds config loaded from file
+        self.config = {}
 
-def create_file():
-    """create config file if it not already exists"""
-    with open(path, 'w', encoding='UTF-8') as file:
-        json.dump(base, file)
+        # create config file with default values, if it does not exist
+        if not self.path.is_file():
+            self.create_file()
 
-def load():
-    """load config dictionary from file"""
-    with open(path, 'r', encoding='UTF-8') as file:
-        config = json.load(file)
+    def create_file(self):
+        """create config file if it not already exists"""
+        with open(self.path, 'w', encoding='UTF-8') as file:
+            json.dump(self.base, file)
 
-def save():
-    """save config dictionary to file"""
-    with open(path, 'w', encoding='UTF-8') as file:
-        json.dump(config, file)
+    def load(self):
+        """load config dictionary from file"""
+        with open(self.path, 'r', encoding='UTF-8') as file:
+            self.config = json.load(file)
+
+    def save(self):
+        """save config dictionary to file"""
+        with open(self.path, 'w', encoding='UTF-8') as file:
+            json.dump(self.config, file)
 
 
-def get_material_id() ->  dict[str, int]:
-    """return the material ids from the config"""
-    load()
-    # data validation
-    for value in config['material_id'].values():
-        if not isinstance(value, int):
-            raise ValueError('material id must be an integer')
-        elif value < 0:
-            raise ValueError('material id must be greater than 0')
-    return config['material_id']
-
-def get_material_color() -> dict[str, list[int]]:
-    """return the material colors from the config"""
-    load()
+    def get_material_id(self) ->  dict[str, int]:
+        """return the material ids from the config"""
+        self.load()
         # data validation
-    for value in config['material_color'].values():
-        if len(value) < 3 or len(value) > 3:
-            raise ValueError('material color must be rgb values (r,g,b)')
-        for color_value in value:
-            if color_value < 0 or color_value > 255:
-                raise ValueError('material color must be rgb values (0<=rgb<=255)')
-    return config['material_color']
+        for value in self.config['material_id'].values():
+            if not isinstance(value, int):
+                raise ValueError('material id must be an integer')
+            elif value < 0:
+                raise ValueError('material id must be greater than 0')
+        return self.config['material_id']
 
-def get_material_translucency() -> dict[str, int]:
-    """return the material translucency in percent from the config"""
-    load()
-    # data validation
-    for value in config['material_translucency'].values():
-        if not isinstance(value, int):
-            raise ValueError('material translucency value must be an integer')
-        elif value < 0 or value > 100:
-            raise ValueError('material translucency value must be between 0 and 100')
+    def get_material_color(self) -> dict[str, list[int]]:
+        """return the material colors from the config"""
+        self.load()
+            # data validation
+        for value in self.config['material_color'].values():
+            if len(value) < 3 or len(value) > 3:
+                raise ValueError('material color must be rgb values (r,g,b)')
+            for color_value in value:
+                if color_value < 0 or color_value > 255:
+                    raise ValueError('material color must be rgb values (0<=rgb<=255)')
+        return self.config['material_color']
 
-    return config['material_translucency']
+    def get_material_translucency(self) -> dict[str, int]:
+        """return the material translucency in percent from the config"""
+        self.load()
+        # data validation
+        for value in self.config['material_translucency'].values():
+            if not isinstance(value, int):
+                raise ValueError('material translucency value must be an integer')
+            elif value < 0 or value > 100:
+                raise ValueError('material translucency value must be between 0 and 100')
 
-def get_model_dimensions() -> dict[str, int]:
-    """return model dimensions (width, height)"""
-    load()
+        return self.config['material_translucency']
 
-    width = config['model_dimensions']['width']
-    height = config['model_dimensions']['height']
-    # data validation
-    if not isinstance(width, int) or not isinstance(height, int):
-        raise ValueError('model width and height must be an integer')
-    elif width*2 != height:
-        raise ValueError('model width and height must have a 1:2 ratio')
-    elif width <= 0 or height <= 0:
-        raise ValueError('model width and height must be greater than 0')
-    else:
-        return config['model_dimensions']
+    def get_model_dimensions(self) -> dict[str, int]:
+        """return model dimensions (width, height)"""
+        self.load()
 
-def get_iterations() -> int:
-    """return l-system iteration count"""
-    load()
-    iterations = config['l_system']['iterations']
+        width = self.config['model_dimensions']['width']
+        height = self.config['model_dimensions']['height']
+        # data validation
+        if not isinstance(width, int) or not isinstance(height, int):
+            raise ValueError('model width and height must be an integer')
+        elif width*2 != height:
+            raise ValueError('model width and height must have a 1:2 ratio')
+        elif width <= 0 or height <= 0:
+            raise ValueError('model width and height must be greater than 0')
+        else:
+            return self.config['model_dimensions']
 
-    # data validation
-    if not isinstance(iterations, int):
-        raise ValueError('iterations must be an integer')
-    elif iterations < 1:
-        raise ValueError('iterations must be at least 1')
-    else:
-        return iterations
+    def get_iterations(self) -> int:
+        """return l-system iteration count"""
+        self.load()
+        iterations = self.config['l_system']['iterations']
 
-def get_start_letter() -> str:
-    """return start letter for l-system"""
-    load()
-    start = config['l_system']['start']
+        # data validation
+        if not isinstance(iterations, int):
+            raise ValueError('iterations must be an integer')
+        elif iterations < 1:
+            raise ValueError('iterations must be at least 1')
+        else:
+            return iterations
 
-    # data validation
-    if not isinstance(start, str):
-        raise ValueError('start must be a string')
-    else:
-        return start
-    
-def get_rules() -> list[dict[str,str]]:
-    """return rules for l-system"""
-    load()
-    rules = config['l_system']['rules']
+    def get_start_letter(self) -> str:
+        """return start letter for l-system"""
+        self.load()
+        start = self.config['l_system']['start']
 
-    # data validation
-    for rule in rules:
-        if not isinstance(rule['letter'], str):
-            raise ValueError('letter must be a string')
-        elif len(rule['letter']) > 1:
-            raise ValueError('letter must be a single character')
-        elif not isinstance(rule['new_letters'], str):
-            raise ValueError('new_letters must be a string')
-    return rules
+        # data validation
+        if not isinstance(start, str):
+            raise ValueError('start must be a string')
+        else:
+            return start
+        
+    def get_rules(self) -> list[dict[str,str]]:
+        """return rules for l-system"""
+        self.load()
+        rules = self.config['l_system']['rules']
 
-def init_config():
-    # create config file with default values, if it does not exist
-    if not path.is_file():
-        create_file()
+        # data validation
+        for rule in rules:
+            if not isinstance(rule['letter'], str):
+                raise ValueError('letter must be a string')
+            elif len(rule['letter']) > 1:
+                raise ValueError('letter must be a single character')
+            elif not isinstance(rule['new_letters'], str):
+                raise ValueError('new_letters must be a string')
+        return rules
+
+config = Config()
+# print(get_model_dimensions())
+# print(get_rules())

@@ -1,6 +1,6 @@
 import numpy as np
 import anvil
-import modules.config as config
+from modules.config import config
 import modules.light as light
 from PIL import Image, ImageDraw
 from pathlib import Path

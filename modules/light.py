@@ -1,5 +1,5 @@
 import numpy as np
-import modules.config as config
+from modules.config import config
 
 class Light:
     def __init__(self, model):
