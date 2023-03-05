@@ -45,13 +45,13 @@ class Config():
         self.config = {}
 
         # create config file with default values, if it does not exist
-        if not self.path.is_file():
-            self.create_file()
+        self.create_file()
 
     def create_file(self):
         """create config file if it not already exists"""
-        with open(self.path, 'w', encoding='UTF-8') as file:
-            json.dump(self.base, file)
+        if not self.path.is_file():
+            with open(self.path, 'w', encoding='UTF-8') as file:
+                json.dump(self.base, file)
 
     def load(self):
         """load config dictionary from file"""
