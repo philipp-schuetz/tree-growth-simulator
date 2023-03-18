@@ -8,7 +8,6 @@ class App:
     def __init__(self):
         self.ui = ui.Ui()
         self.model = model.Model()
-        config.init_config()
 
     def run(self):
         """run main event loop"""

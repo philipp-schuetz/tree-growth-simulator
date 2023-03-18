@@ -1,9 +1,10 @@
 import numpy as np
 import anvil
-import modules.config as config
+from modules.config import config
 import modules.light as light
 from PIL import Image, ImageDraw
 from pathlib import Path
+import random
 
 class Model:
     def __init__(self):
@@ -26,6 +27,19 @@ class Model:
         self.water = -1
         self.temperature = -1
         self.nutrients = -1
+
+        # base material and radius for tree generation
+        self.material = self.id_wood
+        self.radius = 0
+
+        self.sentence = '' # l-system sentence
+        self.iterations = 0
+        self.rules = {}
+
+        # set first positions
+        self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
+        self.position = self.start_position
+        self.positions = []
 
         self.light = light.Light(self.model)
 
@@ -52,6 +66,19 @@ class Model:
         self.nutrients = nutrients
 
         self.light.set_light(light)
+    
+    def set_iterations(self):
+        self.iterations = config.get_iterations()
+
+    def set_start(self):
+        self.sentence = config.get_start_letter()
+
+    def set_rules(self):
+        rules = config.get_rules()
+        for rule in rules:
+            if rule['letter'] not in self.rules:
+                self.rules['letter'] = []
+            self.rules[rule['letter']].append(rule['new_letters'])
 
     def save(self):
         """save model in file"""
@@ -61,7 +88,65 @@ class Model:
         """load lightarray from file"""
         self.model = np.load('../saves/lightarr.npy')
 
-    def generate_images(self):
+
+    # ---------------- l-system ----------------
+
+    # cut the forward move length in half every time
+
+    def apply_rules(self):
+        """apply a rule for each character in the sentence (random rule if multiple exist)"""
+        new_sentence = ''
+        for letter in self.sentence:
+            if letter in self.rules:
+                new_sentence += random.choice(self.rules[letter])
+            else:
+                new_sentence += letter
+        self.sentence = new_sentence
+
+    def place_voxel(self):
+        """set current voxel(s) to specified material"""
+        if self.radius > 0:
+            # row stays the same, radius defines the with of the tree
+            for layer in range(self.position[0]-self.radius, self.position[0]+self.radius):
+                for voxel in range(self.position[2]-self.radius, self.position[2]+self.radius):
+                    self.model[layer,self.position[1],voxel] = self.material
+        elif self.radius == 0:
+            self.model[self.position[0],self.position[1],self.position[2]] = self.material
+        else:
+            raise ValueError("radius for voxel placement can't be nagative")
+
+    def generate_model(self):
+        for iteration in range(0, self.iterations):
+            self.apply_rules()
+            for letter in self.sentence:
+                match letter:
+                    case 'P':
+                        self.place_voxel()
+                    case 'l': # toward negative layer index
+                        self.position[0] = self.position[0]-1
+                    case 'L': # toward positive layer index
+                        self.position[0] = self.position[0]+1
+                    case 'v': # toward negative voxel index
+                        self.position[2] = self.position[2]-1
+                    case 'V': # toward positive voxel index
+                        self.position[2] = self.position[2]+1
+                    case 'c': # center Downward
+                        self.position[1] = self.position[1]+1
+                    case 'C': # center Upward
+                        self.position[1] = self.position[1]-1
+                    case 'r': # radius smaller
+                        if self.radius != 0:
+                            self.radius -= 1
+                    case 'R': # radius larger
+                        self.radius += 1
+                    case '[': # save position
+                        self.positions.append(self.position)
+                    case ']': # get saved position
+                        self.position = self.positions.pop(-1)
+
+    # ---------------- display model ----------------
+
+    def generate_images(self): #TODO generate images with and without leafes (different folders)
         # get colors from config
         colors = config.get_material_color()
         color_leaf = tuple(colors['leaf'])
