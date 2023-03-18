@@ -118,31 +118,32 @@ class Model:
     def generate_model(self):
         for iteration in range(0, self.iterations):
             self.apply_rules()
-            for letter in self.sentence:
-                match letter:
-                    case 'P':
-                        self.place_voxel()
-                    case 'l': # toward negative layer index
-                        self.position[0] = self.position[0]-1
-                    case 'L': # toward positive layer index
-                        self.position[0] = self.position[0]+1
-                    case 'v': # toward negative voxel index
-                        self.position[2] = self.position[2]-1
-                    case 'V': # toward positive voxel index
-                        self.position[2] = self.position[2]+1
-                    case 'c': # center Downward
-                        self.position[1] = self.position[1]+1
-                    case 'C': # center Upward
-                        self.position[1] = self.position[1]-1
-                    case 'r': # radius smaller
-                        if self.radius != 0:
-                            self.radius -= 1
-                    case 'R': # radius larger
-                        self.radius += 1
-                    case '[': # save position
-                        self.positions.append(self.position)
-                    case ']': # get saved position
-                        self.position = self.positions.pop(-1)
+
+        for letter in self.sentence:
+            match letter:
+                case 'P':
+                    self.place_voxel()
+                case 'l': # toward negative layer index
+                    self.position[0] = self.position[0]-1
+                case 'L': # toward positive layer index
+                    self.position[0] = self.position[0]+1
+                case 'v': # toward negative voxel index
+                    self.position[2] = self.position[2]-1
+                case 'V': # toward positive voxel index
+                    self.position[2] = self.position[2]+1
+                case 'c': # center Downward
+                    self.position[1] = self.position[1]+1
+                case 'C': # center Upward
+                    self.position[1] = self.position[1]-1
+                case 'r': # radius smaller
+                    if self.radius != 0:
+                        self.radius -= 1
+                case 'R': # radius larger
+                    self.radius += 1
+                case '[': # save position
+                    self.positions.append(self.position)
+                case ']': # get saved position
+                    self.position = self.positions.pop(-1)
 
     # ---------------- display model ----------------
 
