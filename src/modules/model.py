@@ -61,7 +61,36 @@ class Model:
         """load lightarray from file"""
         self.model = np.load('../saves/lightarr.npy')
 
-    def generate_images(self):
+
+    # ---------------- l-system ----------------
+
+    def apply_rules(self, sentence):
+        # get rules from config, only once at the top of the file, to reduce file reads
+
+        config.create_file()
+
+        # get and sort rules
+        rules = config.get_rules()
+        rules_dict = {}
+        for rule in rules:
+            if rule['letter'] not in rules_dict:
+                rules_dict['letter'] = []
+            rules_dict[rule['letter']].append(rule['new_letters'])
+        
+        print(rules_dict)
+
+        new = ''
+        for letter in sentence:
+            if letter in rules:
+                new += rules[letter]
+            else:
+                new += letter
+        base = new
+
+
+    # ---------------- display model ----------------
+
+    def generate_images(self): #TODO generate images with and without leafes (different folders)
         # get colors from config
         colors = config.get_material_color()
         color_leaf = tuple(colors['leaf'])
