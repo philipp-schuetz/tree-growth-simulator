@@ -27,8 +27,8 @@ class Config():
                 "wall": 0
             },
             "model_dimensions": {
-                "width": 250,
-                "height": 500
+                "width": 249,
+                "height": 599
             },
             "l_system": {
                 "iterations": 4,
