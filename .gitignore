@@ -3,7 +3,6 @@ __pycache__
 .vscode
 venv
 
-images/front.png
-images/back.png
-images/left.png
-images/right.png
+images/*
+
+config.json
