@@ -118,6 +118,7 @@ class Model:
     def generate_model(self):
         for iteration in range(0, self.iterations):
             self.apply_rules()
+        print(self.sentence)
 
         for letter in self.sentence:
             match letter:
@@ -144,6 +145,7 @@ class Model:
                     self.positions.append(self.position)
                 case ']': # get saved position
                     self.position = self.positions.pop(-1)
+        print('done')
 
     # ---------------- display model ----------------
 
@@ -214,12 +216,12 @@ class Model:
                 
                 
                 # check if output path exists, otherwise create
-                out_dir = Path('images-leafes')
+                out_dir = Path('images-leafs')
                 if not out_dir.is_dir():
                     out_dir.mkdir(parents=True, exist_ok=True)
 
                 # save image to file
-                image.save('images/'+side+'.png')
+                image.save('images-leafs/'+side+'.png')
 
 
         # -------- image generation without leafs --------
