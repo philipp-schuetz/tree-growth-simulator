@@ -38,6 +38,9 @@ class Config():
                     {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
                     {"letter": "F", "new_letters": "FF"}
                 ]
+            },
+            "image_generation": {
+                "add_leafs": True
             }
         }
 
@@ -153,6 +156,16 @@ class Config():
             elif not isinstance(rule['new_letters'], str):
                 raise ValueError('new_letters must be a string')
         return rules
+    
+    def get_add_leafs(self) -> bool:
+        """return True if image generation should use leafs, else return False"""
+        self.load()
+        boolean = self.config['image_generation']['add_leafs']
+
+        # data validation
+        if not isinstance(boolean, bool):
+            raise ValueError('add_leafes value must be a boolean')
+        return boolean
 
 config = Config()
 # print(get_model_dimensions())

@@ -147,74 +147,142 @@ class Model:
 
     # ---------------- display model ----------------
 
-    def generate_images(self): #TODO generate images with and without leafes (different folders)
+    def generate_images(self):
         # get colors from config
         colors = config.get_material_color()
         color_leaf = tuple(colors['leaf'])
         color_wood = tuple(colors['wood'])
 
+        add_leafs = config.get_add_leafs()
+
         sides = ['front', 'back', 'left', 'right']
-        for side in sides:
-            image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
-            d = ImageDraw.Draw(image)
+        
+        # -------- image generation with leafs --------
+        if add_leafs == True:
+            for side in sides:
+                image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+                d = ImageDraw.Draw(image)
 
-            # array to save visible voxels
-            visible = np.zeros((self.height, self.width))
+                # array to save visible voxels
+                visible = np.zeros((self.height, self.width))
 
-            if side == 'front':
-                # iterate through map and add visible voxels to array
-                for layer in range(0, self.width):
-                    for row in range(0, self.height):
-                        for voxel in range(0, self.width):
-                            # there is no voxel set, set new one 
-                            if visible[row,voxel] == self.id_air:
-                                visible[row,voxel] = self.model[layer,row,voxel]
+                if side == 'front':
+                    # iterate through map and add visible voxels to array
+                    for layer in range(0, self.width):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # there is no voxel set, set new one 
+                                if visible[row,voxel] == self.id_air:
+                                    visible[row,voxel] = self.model[layer,row,voxel]
+                    
+                if side == 'back':
+                    # iterate through map and add visible voxels to array
+                    for layer in range(self.width-1,-1,-1):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # there is no voxel set, set new one 
+                                if visible[row,-voxel-1] == self.id_air:
+                                    # 'mirror' voxel value, because of iteration from back
+                                    visible[row,-voxel-1] = self.model[layer,row,voxel]
+
+                if side == 'left':
+                    for layer in range(0, self.width):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # if visible empty on this index, set to current voxel
+                                if visible[row,self.width-(layer+1)] == self.id_air:
+                                    visible[row,self.width-(layer+1)] = self.model[layer,row,voxel]
+
+                if side == 'right':
+                    for layer in range(self.width-1,-1,-1):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # if visible empty on this index, set to current voxel
+                                to_mirror = self.width-(layer+1)
+                                if visible[row,-to_mirror-1] == self.id_air:
+                                    visible[row,-to_mirror-1] = self.model[layer,row,voxel]
+
+                # iterate through visible voxels and add them to image
+                for row in range(0, self.height):
+                    for voxel in range(0, self.width):
+                        if visible[row,voxel] == self.id_leaf:
+                            d.rectangle(((voxel, row), (voxel, row)), color_leaf)
+                        elif visible[row,voxel] == self.id_wood:
+                            d.rectangle(((voxel, row), (voxel, row)), color_wood)
+                # reset visible
+                visible = np.zeros((self.height, self.width))
                 
-            if side == 'back':
-                # iterate through map and add visible voxels to array
-                for layer in range(self.width-1,-1,-1):
-                    for row in range(0, self.height):
-                        for voxel in range(0, self.width):
-                            # there is no voxel set, set new one 
-                            if visible[row,-voxel-1] == self.id_air:
-                                # 'mirror' voxel value, because of iteration from back
-                                visible[row,-voxel-1] = self.model[layer,row,voxel]
+                
+                # check if output path exists, otherwise create
+                out_dir = Path('images-leafes')
+                if not out_dir.is_dir():
+                    out_dir.mkdir(parents=True, exist_ok=True)
 
-            if side == 'left':
-                for layer in range(0, self.width):
-                    for row in range(0, self.height):
-                        for voxel in range(0, self.width):
-                            # if visible empty on this index, set to current voxel
-                            if visible[row,self.width-(layer+1)] == self.id_air:
-                                visible[row,self.width-(layer+1)] = self.model[layer,row,voxel]
+                # save image to file
+                image.save('images/'+side+'.png')
 
-            if side == 'right':
-                for layer in range(self.width-1,-1,-1):
-                    for row in range(0, self.height):
-                        for voxel in range(0, self.width):
-                            # if visible empty on this index, set to current voxel
-                            to_mirror = self.width-(layer+1)
-                            if visible[row,-to_mirror-1] == self.id_air:
-                                visible[row,-to_mirror-1] = self.model[layer,row,voxel]
 
-            # iterate through visible voxels and add them to image
-            for row in range(0, self.height):
-                for voxel in range(0, self.width):
-                    if visible[row,voxel] == self.id_leaf:
-                        d.rectangle(((voxel, row), (voxel, row)), color_leaf)
-                    elif visible[row,voxel] == self.id_wood:
-                        d.rectangle(((voxel, row), (voxel, row)), color_wood)
-            # reset visible
-            visible = np.zeros((self.height, self.width))
-            
-            
-            # check if output path exists, otherwise create
-            out_dir = Path('images')
-            if not out_dir.is_dir():
-                out_dir.mkdir(parents=True, exist_ok=True)
+        # -------- image generation without leafs --------
+        if add_leafs != True:
+            for side in sides:
+                image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+                d = ImageDraw.Draw(image)
 
-            # save image to file
-            image.save('images/'+side+'.png')
+                # array to save visible voxels
+                visible = np.zeros((self.height, self.width))
+
+                if side == 'front':
+                    # iterate through map and add visible voxels to array
+                    for layer in range(0, self.width):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # if visible empty or leaf on this index, set to current voxel
+                                if visible[row,voxel] == self.id_air or visible[row,voxel] == self.id_leaf:
+                                    visible[row,voxel] = self.model[layer,row,voxel]
+                    
+                if side == 'back':
+                    # iterate through map and add visible voxels to array
+                    for layer in range(self.width-1,-1,-1):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # if visible empty or leaf on this index, set to current voxel
+                                if visible[row,-voxel-1] == self.id_air or visible[row,-voxel-1] == self.id_leaf:
+                                    # 'mirror' voxel value, because of iteration from back
+                                    visible[row,-voxel-1] = self.model[layer,row,voxel]
+
+                if side == 'left':
+                    for layer in range(0, self.width):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # if visible empty or leaf on this index, set to current voxel
+                                if visible[row,self.width-(layer+1)] == self.id_air or visible[row,self.width-(layer+1)] == self.id_leaf:
+                                    visible[row,self.width-(layer+1)] = self.model[layer,row,voxel]
+
+                if side == 'right':
+                    for layer in range(self.width-1,-1,-1):
+                        for row in range(0, self.height):
+                            for voxel in range(0, self.width):
+                                # if visible empty or leaf on this index, set to current voxel
+                                to_mirror = self.width-(layer+1)
+                                if visible[row,-to_mirror-1] == self.id_air or visible[row,-to_mirror-1] == self.id_leaf:
+                                    visible[row,-to_mirror-1] = self.model[layer,row,voxel]
+
+                # iterate through visible voxels and add them to image
+                for row in range(0, self.height):
+                    for voxel in range(0, self.width):
+                        if visible[row,voxel] == self.id_wood:
+                            d.rectangle(((voxel, row), (voxel, row)), color_wood)
+                # reset visible
+                visible = np.zeros((self.height, self.width))
+                
+                
+                # check if output path exists, otherwise create
+                out_dir = Path('images-no-leafs')
+                if not out_dir.is_dir():
+                    out_dir.mkdir(parents=True, exist_ok=True)
+
+                # save image to file
+                image.save('images-no-leafs/'+side+'.png')
 
     # TODO: fix path, maybe add to config
     def model_minecraft(self, arr, path: str = "/Users/philippschuetz/Library/Application Support/minecraft/saves/Simulation/region/"):
