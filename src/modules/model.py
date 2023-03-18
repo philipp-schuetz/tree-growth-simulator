@@ -30,7 +30,7 @@ class Model:
 
         # base material and radius for tree generation
         self.material = self.id_wood
-        self.radius = 0
+        self.radius = config.get_radius()
 
         self.sentence = '' # l-system sentence
         self.iterations = 0
@@ -71,7 +71,7 @@ class Model:
         self.iterations = config.get_iterations()
 
     def set_start(self):
-        self.sentence = config.get_start_letter()
+        self.sentence = config.get_axiom()
 
     def set_rules(self):
         rules = config.get_rules()

@@ -32,8 +32,8 @@ class Config():
             },
             "l_system": {
                 "iterations": 4,
-                "start": "X",
-                "angle": 25,
+                "radius": 16,
+                "axiom": "C",
                 "rules": [
                     {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
                     {"letter": "F", "new_letters": "FF"}
@@ -130,8 +130,19 @@ class Config():
             raise ValueError('iterations must be at least 1')
         else:
             return iterations
+    
+    def get_radius(self) -> int:
+        self.load()
+        radius = self.config['l_system']['radius']
+        # data validation
+        if not isinstance(radius, int):
+            raise ValueError('radius must be an integer')
+        elif radius < 0:
+            raise ValueError('radius must be positive')
+        else:
+            return radius
 
-    def get_start_letter(self) -> str:
+    def get_axiom(self) -> str:
         """return start letter for l-system"""
         self.load()
         start = self.config['l_system']['start']
