@@ -114,11 +114,18 @@ class Model:
             self.model[self.position[0],self.position[1],self.position[2]] = self.material
         else:
             raise ValueError("radius for voxel placement can't be nagative")
+        
+    def is_next_to(self, material_id:int) -> bool:
+        pass
 
     def generate_model(self):
+        # TODO check values of all modifiers before generating
+        # all generator values must reach a specific minimum (or maximum) value to start growing
+        # reaching a specific value could add specific rules for generation or modify the iterations variable
+
         for iteration in range(0, self.iterations):
             self.apply_rules()
-        print(self.sentence)
+        print(f'sentence: {self.sentence}') # TODO: fix: only empty sentence is generated
 
         for letter in self.sentence:
             match letter:
