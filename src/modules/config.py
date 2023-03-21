@@ -32,12 +32,15 @@ class Config():
             },
             "l_system": {
                 "iterations": 4,
-                "start": "X",
-                "angle": 25,
+                "radius": 16,
+                "axiom": "C",
                 "rules": [
                     {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
                     {"letter": "F", "new_letters": "FF"}
                 ]
+            },
+            "image_generation": {
+                "add_leafs": True
             }
         }
 
@@ -127,8 +130,19 @@ class Config():
             raise ValueError('iterations must be at least 1')
         else:
             return iterations
+    
+    def get_radius(self) -> int:
+        self.load()
+        radius = self.config['l_system']['radius']
+        # data validation
+        if not isinstance(radius, int):
+            raise ValueError('radius must be an integer')
+        elif radius < 0:
+            raise ValueError('radius must be positive')
+        else:
+            return radius
 
-    def get_start_letter(self) -> str:
+    def get_axiom(self) -> str:
         """return start letter for l-system"""
         self.load()
         start = self.config['l_system']['start']
@@ -153,6 +167,16 @@ class Config():
             elif not isinstance(rule['new_letters'], str):
                 raise ValueError('new_letters must be a string')
         return rules
+    
+    def get_add_leafs(self) -> bool:
+        """return True if image generation should use leafs, else return False"""
+        self.load()
+        boolean = self.config['image_generation']['add_leafs']
+
+        # data validation
+        if not isinstance(boolean, bool):
+            raise ValueError('add_leafes value must be a boolean')
+        return boolean
 
 config = Config()
 # print(get_model_dimensions())

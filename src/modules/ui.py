@@ -18,9 +18,9 @@ class Ui:
 
         # define ui layout
         self.layout = [
-            [sg.Frame(title='Modifiers', layout=[
+            [sg.Frame(title='Modifiers in %', layout=[
                 [
-                    sg.Text('Light in %'),
+                    sg.Text('Light'),
                     sg.Slider(range=(0,200), default_value=100, key='light', orientation='horizontal')
                 ],
                 [
@@ -31,15 +31,15 @@ class Ui:
                     sg.Checkbox('top', default=True, key='top')
                 ],
                 [
-                    sg.Text('Water in %'),
+                    sg.Text('Water'),
                     sg.Slider(range=(0,200), default_value=100, key='water', orientation='horizontal')
                 ],
                 [
-                    sg.Text('Temperature in %'),
+                    sg.Text('Temperature'),
                     sg.Slider(range=(0,200), default_value=100, key='temperature', orientation='horizontal')
                 ],
                 [
-                    sg.Text('Nutrients in %'),
+                    sg.Text('Nutrients'),
                     sg.Slider(range=(0,200), default_value=100, key='nutrients', orientation='horizontal')
                 ]
             ]), sg.Frame(title='Buttons', layout=[
