@@ -147,18 +147,26 @@ class Model:
             self.apply_rules()
         print(f'sentence: {self.sentence}') # TODO: fix: only empty sentence is generated
 
+        current_direction = 0
+
         for letter in self.sentence:
             match letter:
                 case 'P':
                     self.place_voxel()
-                case 'l': # toward negative layer index
-                    self.position[0] = self.position[0]-1
-                case 'L': # toward positive layer index
-                    self.position[0] = self.position[0]+1
-                case 'v': # toward negative voxel index
-                    self.position[2] = self.position[2]-1
-                case 'V': # toward positive voxel index
-                    self.position[2] = self.position[2]+1
+                case 'F': # forward
+                    match current_direction:
+                        case 0:# positive layer
+                            self.position[0] = self.position[0]+1
+                        case 1: # negative voxel
+                            self.position[2] = self.position[2]-1
+                        case 2:# negative layer
+                            self.position[0] = self.position[0]-1
+                        case 3: # positive voxel
+                            self.position[2] = self.position[2]+1
+                case 'T': # turn right
+                    current_direction += 1
+                    if current_direction > 3:
+                        current_direction = 0
                 case 'c': # center Downward
                     self.position[1] = self.position[1]+1
                 case 'C': # center Upward
