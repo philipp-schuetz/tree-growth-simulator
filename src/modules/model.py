@@ -115,8 +115,28 @@ class Model:
         else:
             raise ValueError("radius for voxel placement can't be nagative")
         
-    def is_next_to(self, material_id:int) -> bool:
-        pass
+    def is_next_to(self, coordinates:tuple, material_id:int) -> bool:
+        """return True if voxel has material next to it"""
+        # hinten
+        if self.model[coordinates[0]-1,coordinates[1],coordinates[2]] == material_id:
+            return True
+        # vorne
+        elif self.model[coordinates[0]+1,coordinates[1],coordinates[2]] == material_id:
+            return True
+        # unten
+        elif self.model[coordinates[0],coordinates[1]-1,coordinates[2]] == material_id:
+            return True
+        # oben
+        elif self.model[coordinates[0],coordinates[1]+1,coordinates[2]] == material_id:
+            return True
+        # links
+        elif self.model[coordinates[0],coordinates[1],coordinates[2]-1] == material_id:
+            return True
+        # rechts
+        elif self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
+            return True
+        else:
+            return False
 
     def generate_model(self):
         # TODO check values of all modifiers before generating
