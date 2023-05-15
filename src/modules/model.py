@@ -164,10 +164,14 @@ class Model:
                             self.position[0] = self.position[0]-1
                         case 3: # positive voxel
                             self.position[2] = self.position[2]+1
-                case 'T': # turn right
+                case '+': # turn right 90°
                     current_direction += 1
                     if current_direction > 3:
                         current_direction = 0
+                case '-': # turn left 90°
+                    current_direction -= 1
+                    if current_direction  < 0:
+                        current_direction = 3
                 case 'c': # center Downward
                     self.position[1] = self.position[1]+1
                 case 'C': # center Upward
