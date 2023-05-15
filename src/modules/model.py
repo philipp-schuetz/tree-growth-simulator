@@ -39,7 +39,7 @@ class Model:
         # set first positions
         self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
         self.position = self.start_position
-        self.positions = []
+        self.saved = []
 
         self.light = light.Light(self.model)
 
@@ -177,10 +177,12 @@ class Model:
                         self.radius -= 1
                 case 'R': # radius larger
                     self.radius += 1
-                case '[': # save position
-                    self.positions.append(self.position)
-                case ']': # get saved position
-                    self.position = self.positions.pop(-1)
+                case '[': # save position, orientation
+                    self.saved.append([self.position, current_direction])
+                case ']': # get saved position and orientation
+                    self.position = self.saved.pop(-1)[0]
+                    current_direction = self.saved.pop(-1)[1]
+
 
         # ---- generate leafs ----
         for layer in range(0, self.width):
