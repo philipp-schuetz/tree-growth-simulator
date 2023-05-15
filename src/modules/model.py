@@ -115,24 +115,24 @@ class Model:
         else:
             raise ValueError("radius for voxel placement can't be nagative")
         
-    def is_next_to(self, coordinates:tuple, material_id:int) -> bool:
-        """return True if voxel has material next to it"""
-        # hinten
+    def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
+        """return True if voxel has given material next to it"""
+        # back
         if self.model[coordinates[0]-1,coordinates[1],coordinates[2]] == material_id:
             return True
-        # vorne
+        # front
         elif self.model[coordinates[0]+1,coordinates[1],coordinates[2]] == material_id:
             return True
-        # unten
+        # bottom
         elif self.model[coordinates[0],coordinates[1]-1,coordinates[2]] == material_id:
             return True
-        # oben
+        # top
         elif self.model[coordinates[0],coordinates[1]+1,coordinates[2]] == material_id:
             return True
-        # links
+        # left
         elif self.model[coordinates[0],coordinates[1],coordinates[2]-1] == material_id:
             return True
-        # rechts
+        # right
         elif self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
             return True
         else:
@@ -143,6 +143,7 @@ class Model:
         # all generator values must reach a specific minimum (or maximum) value to start growing
         # reaching a specific value could add specific rules for generation or modify the iterations variable
 
+        # ---- generate structure ----
         for iteration in range(0, self.iterations):
             self.apply_rules()
         print(f'sentence: {self.sentence}') # TODO: fix: only empty sentence is generated
@@ -180,6 +181,17 @@ class Model:
                     self.positions.append(self.position)
                 case ']': # get saved position
                     self.position = self.positions.pop(-1)
+
+        # ---- generate leafs ----
+        for layer in range(0, self.width):
+            for row in range(0, self.height):
+                for voxel in range(0, self.width):
+                    # check if voxel is next to wood and minimum lightlevel is reached
+                    if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= config.get_minimum_light_level():
+                        # add leaf
+                        self.model[layer,row,voxel] = self.id_leaf
+                        # recalculate lightlevel
+                        self.light.calculate()
         print('done')
 
     # ---------------- display model ----------------
@@ -190,6 +202,7 @@ class Model:
         color_leaf = tuple(colors['leaf'])
         color_wood = tuple(colors['wood'])
 
+        # only influences image generation and not model
         add_leafs = config.get_add_leafs()
 
         sides = ['front', 'back', 'left', 'right']
