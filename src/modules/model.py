@@ -115,30 +115,59 @@ class Model:
         else:
             raise ValueError("radius for voxel placement can't be nagative")
         
-    def is_next_to(self, material_id:int) -> bool:
-        pass
+    def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
+        """return True if voxel has given material next to it"""
+        # back
+        if self.model[coordinates[0]-1,coordinates[1],coordinates[2]] == material_id:
+            return True
+        # front
+        elif self.model[coordinates[0]+1,coordinates[1],coordinates[2]] == material_id:
+            return True
+        # bottom
+        elif self.model[coordinates[0],coordinates[1]-1,coordinates[2]] == material_id:
+            return True
+        # top
+        elif self.model[coordinates[0],coordinates[1]+1,coordinates[2]] == material_id:
+            return True
+        # left
+        elif self.model[coordinates[0],coordinates[1],coordinates[2]-1] == material_id:
+            return True
+        # right
+        elif self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
+            return True
+        else:
+            return False
 
     def generate_model(self):
         # TODO check values of all modifiers before generating
         # all generator values must reach a specific minimum (or maximum) value to start growing
         # reaching a specific value could add specific rules for generation or modify the iterations variable
 
+        # ---- generate structure ----
         for iteration in range(0, self.iterations):
             self.apply_rules()
         print(f'sentence: {self.sentence}') # TODO: fix: only empty sentence is generated
+
+        current_direction = 0
 
         for letter in self.sentence:
             match letter:
                 case 'P':
                     self.place_voxel()
-                case 'l': # toward negative layer index
-                    self.position[0] = self.position[0]-1
-                case 'L': # toward positive layer index
-                    self.position[0] = self.position[0]+1
-                case 'v': # toward negative voxel index
-                    self.position[2] = self.position[2]-1
-                case 'V': # toward positive voxel index
-                    self.position[2] = self.position[2]+1
+                case 'F': # forward
+                    match current_direction:
+                        case 0:# positive layer
+                            self.position[0] = self.position[0]+1
+                        case 1: # negative voxel
+                            self.position[2] = self.position[2]-1
+                        case 2:# negative layer
+                            self.position[0] = self.position[0]-1
+                        case 3: # positive voxel
+                            self.position[2] = self.position[2]+1
+                case 'T': # turn right
+                    current_direction += 1
+                    if current_direction > 3:
+                        current_direction = 0
                 case 'c': # center Downward
                     self.position[1] = self.position[1]+1
                 case 'C': # center Upward
@@ -152,6 +181,17 @@ class Model:
                     self.positions.append(self.position)
                 case ']': # get saved position
                     self.position = self.positions.pop(-1)
+
+        # ---- generate leafs ----
+        for layer in range(0, self.width):
+            for row in range(0, self.height):
+                for voxel in range(0, self.width):
+                    # check if voxel is next to wood and minimum lightlevel is reached
+                    if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= config.get_minimum_light_level():
+                        # add leaf
+                        self.model[layer,row,voxel] = self.id_leaf
+                        # recalculate lightlevel
+                        self.light.calculate()
         print('done')
 
     # ---------------- display model ----------------
@@ -162,6 +202,7 @@ class Model:
         color_leaf = tuple(colors['leaf'])
         color_wood = tuple(colors['wood'])
 
+        # only influences image generation and not model
         add_leafs = config.get_add_leafs()
 
         sides = ['front', 'back', 'left', 'right']

@@ -28,19 +28,21 @@ class Config():
             },
             "model_dimensions": {
                 "width": 249,
-                "height": 599
+                "height": 498
             },
             "l_system": {
-                "iterations": 4,
+                "iterations": 1,
                 "radius": 16,
                 "axiom": "C",
                 "rules": [
-                    {"letter": "X", "new_letters": "F+[[X]-X]-F[-FX]+X"},
-                    {"letter": "F", "new_letters": "FF"}
+                    {"letter": "C", "new_letters": "CPrCPrCPrCPrCPrCPrCPrCPr"},
                 ]
             },
             "image_generation": {
                 "add_leafs": True
+            },
+            "light": {
+                "minimum": 20
             }
         }
 
@@ -117,6 +119,19 @@ class Config():
             raise ValueError('model width and height must be greater than 0')
         else:
             return self.config['model_dimensions']
+
+    def get_minimum_light_level(self) -> int:
+        """return the minimum light level needed to spawn wood or leafs"""
+        self.load()
+
+        minimum = self.config['light']['minimum']
+        # data validation
+        if not isinstance(minimum, int):
+            raise ValueError('minimum light level must be an integer')
+        elif minimum <= 0:
+            raise ValueError('minimum light level must be positive')
+        else:
+            return minimum
 
     def get_iterations(self) -> int:
         """return l-system iteration count"""
