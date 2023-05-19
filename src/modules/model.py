@@ -39,9 +39,14 @@ class Model:
         # set first positions
         self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
         self.position = self.start_position
-        self.positions = []
+        self.saved = []
 
         self.light = light.Light(self.model)
+
+        # l-system data
+        self.set_iterations()
+        self.set_axiom()
+        self.set_rules()
 
     def set_light_sides(self, sides: list[bool]):
         """format of sides: [front, back, left, right, top]"""
@@ -70,14 +75,15 @@ class Model:
     def set_iterations(self):
         self.iterations = config.get_iterations()
 
-    def set_start(self):
+    def set_axiom(self):
         self.sentence = config.get_axiom()
 
     def set_rules(self):
         rules = config.get_rules()
         for rule in rules:
+            # if letter not already in rules, add a space for it
             if rule['letter'] not in self.rules:
-                self.rules['letter'] = []
+                self.rules[rule['letter']] = []
             self.rules[rule['letter']].append(rule['new_letters'])
 
     def save(self):
@@ -117,25 +123,28 @@ class Model:
         
     def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
         """return True if voxel has given material next to it"""
-        # back
-        if self.model[coordinates[0]-1,coordinates[1],coordinates[2]] == material_id:
-            return True
-        # front
-        elif self.model[coordinates[0]+1,coordinates[1],coordinates[2]] == material_id:
-            return True
-        # bottom
-        elif self.model[coordinates[0],coordinates[1]-1,coordinates[2]] == material_id:
-            return True
-        # top
-        elif self.model[coordinates[0],coordinates[1]+1,coordinates[2]] == material_id:
-            return True
-        # left
-        elif self.model[coordinates[0],coordinates[1],coordinates[2]-1] == material_id:
-            return True
-        # right
-        elif self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
-            return True
-        else:
+        try:
+            # back
+            if self.model[coordinates[0]-1,coordinates[1],coordinates[2]] == material_id:
+                return True
+            # front
+            elif self.model[coordinates[0]+1,coordinates[1],coordinates[2]] == material_id:
+                return True
+            # bottom
+            elif self.model[coordinates[0],coordinates[1]-1,coordinates[2]] == material_id:
+                return True
+            # top
+            elif self.model[coordinates[0],coordinates[1]+1,coordinates[2]] == material_id:
+                return True
+            # left
+            elif self.model[coordinates[0],coordinates[1],coordinates[2]-1] == material_id:
+                return True
+            # right
+            elif self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
+                return True
+            else:
+                return False
+        except IndexError:
             return False
 
     def generate_model(self):
@@ -144,9 +153,11 @@ class Model:
         # reaching a specific value could add specific rules for generation or modify the iterations variable
 
         # ---- generate structure ----
-        for iteration in range(0, self.iterations):
+        iteration = 0
+        while iteration < self.iterations:
             self.apply_rules()
-        print(f'sentence: {self.sentence}') # TODO: fix: only empty sentence is generated
+            iteration += 1
+            print(f'sentence: {self.sentence}; iteration: {iteration}/{self.iterations}')
 
         current_direction = 0
 
@@ -164,10 +175,14 @@ class Model:
                             self.position[0] = self.position[0]-1
                         case 3: # positive voxel
                             self.position[2] = self.position[2]+1
-                case 'T': # turn right
+                case '+': # turn right 90°
                     current_direction += 1
                     if current_direction > 3:
                         current_direction = 0
+                case '-': # turn left 90°
+                    current_direction -= 1
+                    if current_direction  < 0:
+                        current_direction = 3
                 case 'c': # center Downward
                     self.position[1] = self.position[1]+1
                 case 'C': # center Upward
@@ -177,10 +192,12 @@ class Model:
                         self.radius -= 1
                 case 'R': # radius larger
                     self.radius += 1
-                case '[': # save position
-                    self.positions.append(self.position)
-                case ']': # get saved position
-                    self.position = self.positions.pop(-1)
+                case '[': # save position, orientation
+                    self.saved.append([self.position, current_direction])
+                case ']': # get saved position and orientation
+                    self.position = self.saved.pop(-1)[0]
+                    current_direction = self.saved.pop(-1)[1]
+
 
         # ---- generate leafs ----
         for layer in range(0, self.width):
@@ -333,6 +350,8 @@ class Model:
 
                 # save image to file
                 image.save('images-no-leafs/'+side+'.png')
+        
+        print('images generated')
 
     # TODO: fix path, maybe add to config
     def model_minecraft(self, arr, path: str = "/Users/philippschuetz/Library/Application Support/minecraft/saves/Simulation/region/"):

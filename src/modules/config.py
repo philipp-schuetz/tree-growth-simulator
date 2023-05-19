@@ -31,11 +31,14 @@ class Config():
                 "height": 498
             },
             "l_system": {
-                "iterations": 1,
-                "radius": 16,
-                "axiom": "C",
+                "iterations": 64,
+                "radius": 0,
+                "axiom": "P",
                 "rules": [
-                    {"letter": "C", "new_letters": "CPrCPrCPrCPrCPrCPrCPrCPr"},
+                    {"letter": "P", "new_letters": "F[+cP][-cP]"},
+                    {"letter": "F", "new_letters": "F"},
+                    {"letter": "c", "new_letters": "c"},
+                    {"letter": "C", "new_letters": "C"},
                 ]
             },
             "image_generation": {
@@ -160,7 +163,7 @@ class Config():
     def get_axiom(self) -> str:
         """return start letter for l-system"""
         self.load()
-        start = self.config['l_system']['start']
+        start = self.config['l_system']['axiom']
 
         # data validation
         if not isinstance(start, str):
