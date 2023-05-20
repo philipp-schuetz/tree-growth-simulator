@@ -31,7 +31,7 @@ class Config():
                 "height": 498
             },
             "l_system": {
-                "iterations": 64,
+                "iterations": 8,
                 "radius": 0,
                 "axiom": "P",
                 "rules": [
