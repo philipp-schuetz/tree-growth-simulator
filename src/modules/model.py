@@ -5,6 +5,8 @@ import modules.light as light
 from PIL import Image, ImageDraw
 from pathlib import Path
 import random
+import matplotlib.pyplot as plt
+# from mpl_toolkits.mplot3d import Axes3D
 
 class Model:
     def __init__(self):
@@ -45,8 +47,6 @@ class Model:
 
         # l-system data
         self.set_iterations()
-        self.set_axiom()
-        self.set_rules()
 
     def set_light_sides(self, sides: list[bool]):
         """format of sides: [front, back, left, right, top]"""
@@ -74,17 +74,6 @@ class Model:
     
     def set_iterations(self):
         self.iterations = config.get_iterations()
-
-    def set_axiom(self):
-        self.sentence = config.get_axiom()
-
-    def set_rules(self):
-        rules = config.get_rules()
-        for rule in rules:
-            # if letter not already in rules, add a space for it
-            if rule['letter'] not in self.rules:
-                self.rules[rule['letter']] = []
-            self.rules[rule['letter']].append(rule['new_letters'])
 
     def save(self):
         """save model in file"""
@@ -153,6 +142,13 @@ class Model:
         # reaching a specific value could add specific rules for generation or modify the iterations variable
 
         # ---- generate structure ----
+
+        # ---- part1 - trunk ----
+        # get initial radius from config
+
+
+
+
         iteration = 0
         while iteration < self.iterations:
             self.apply_rules()
@@ -212,6 +208,33 @@ class Model:
         print('done')
 
     # ---------------- display model ----------------
+    def mathplotlib_plot(self):
+        # TODO get ids from config
+
+        # Plot the resulting tree model
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Get the coordinates of the wood voxels
+        x, y, z = np.where(self.model == self.id_wood)
+        x1, y1, z1 = np.where(self.model == self.id_leaf)
+
+        # Plot the wood voxels
+        ax.scatter(x, y, z, c='brown', marker='s')
+        ax.scatter(x1, y1, z1, c='green', marker='s')
+
+        # Set the limits for the axes
+        ax.set_xlim(0, self.model.shape[0])
+        ax.set_ylim(0, self.model.shape[1])
+        ax.set_zlim(0, self.model.shape[2])
+
+        # Set labels for the axes
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+
+        # Show the plot
+        plt.show()
 
     def generate_images(self):
         # get colors from config

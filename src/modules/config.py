@@ -34,12 +34,6 @@ class Config():
                 "iterations": 8,
                 "radius": 0,
                 "axiom": "P",
-                "rules": [
-                    {"letter": "P", "new_letters": "F[+cP][-cP]"},
-                    {"letter": "F", "new_letters": "F"},
-                    {"letter": "c", "new_letters": "c"},
-                    {"letter": "C", "new_letters": "C"},
-                ]
             },
             "image_generation": {
                 "add_leafs": True
@@ -159,32 +153,6 @@ class Config():
             raise ValueError('radius must be positive')
         else:
             return radius
-
-    def get_axiom(self) -> str:
-        """return start letter for l-system"""
-        self.load()
-        start = self.config['l_system']['axiom']
-
-        # data validation
-        if not isinstance(start, str):
-            raise ValueError('start must be a string')
-        else:
-            return start
-        
-    def get_rules(self) -> list[dict[str,str]]:
-        """return rules for l-system"""
-        self.load()
-        rules = self.config['l_system']['rules']
-
-        # data validation
-        for rule in rules:
-            if not isinstance(rule['letter'], str):
-                raise ValueError('letter must be a string')
-            elif len(rule['letter']) > 1:
-                raise ValueError('letter must be a single character')
-            elif not isinstance(rule['new_letters'], str):
-                raise ValueError('new_letters must be a string')
-        return rules
     
     def get_add_leafs(self) -> bool:
         """return True if image generation should use leafs, else return False"""
@@ -197,5 +165,3 @@ class Config():
         return boolean
 
 config = Config()
-# print(get_model_dimensions())
-# print(get_rules())
