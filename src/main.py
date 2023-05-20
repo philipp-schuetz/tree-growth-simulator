@@ -8,7 +8,8 @@ if __name__ == "__main__":
 
 # TODO recalculate light levels only when needed, does tree need light every step?
 
-
+# TODO add process logging
+# TODO enable the user to get images with and without leafs at the same time
 # leaf generation
 # from bottom to top?
 # minimum lightlevel for leafes
