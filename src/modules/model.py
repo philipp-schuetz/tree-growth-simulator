@@ -85,14 +85,21 @@ class Model:
     def place_voxel(self):
         """set current voxel(s) to specified material"""
         if self.radius > 0:
-            # row stays the same, radius defines the with of the tree
-            for layer in range(self.position[0]-self.radius, self.position[0]+self.radius):
-                for voxel in range(self.position[2]-self.radius, self.position[2]+self.radius):
-                    self.model[layer,self.position[1],voxel] = self.material
+            # row stays the same, radius defines the width of the tree
+            # for layer in range(self.position[0]-self.radius, self.position[0]+self.radius):
+            #     for voxel in range(self.position[2]-self.radius, self.position[2]+self.radius):
+            #         self.model[layer,self.position[1],voxel] = self.material
+
+            for layer in range(self.width):
+                for voxel in range(self.width):
+                    distance = np.sqrt((layer - self.position[0])**2 + (voxel - self.position[2])**2)
+                    if distance <= self.radius:
+                        self.model[layer,self.position[1],voxel] = self.material
+
         elif self.radius == 0:
             self.model[self.position[0],self.position[1],self.position[2]] = self.material
         else:
-            raise ValueError("radius for voxel placement can't be nagative")
+            raise ValueError("radius for voxel placement can't be negative")
         
     def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
         """return True if voxel has given material next to it"""
@@ -146,17 +153,17 @@ class Model:
 
     def up(self):
         """move up one voxel"""
-        self.position[1] += 1
+        self.position[1] -= 1
     
     def down(self):
         """move down one voxel"""
-        self.position[1] -= 1
+        self.position[1] += 1
     
     def set_radius(self, amount:int):
         """change radius size by the set amount"""
         radius = self.radius
         radius += amount
-        if self.radius >= 0:
+        if radius >= 0:
             self.radius = radius
         else:
             return
@@ -195,11 +202,14 @@ class Model:
         # reaching a specific value could add specific rules for generation or modify the iterations variable
 
         # ---- generate structure ----
-
-        # ---- part1 - trunk ----
-        # get initial radius from config
-
-
+        run = True
+        while run:
+            for i in range(300):
+                self.place_voxel()
+                self.up()
+                self.set_radius(-1)
+            run = False
+            
 
         # ---- generate leafs ----
         for layer in range(0, self.width):
@@ -223,19 +233,19 @@ class Model:
         x, y, z = np.where(self.model == self.id_wood)
         x1, y1, z1 = np.where(self.model == self.id_leaf)
 
-        # Plot the wood voxels
-        ax.scatter(x, y, z, c='brown', marker='s')
-        ax.scatter(x1, y1, z1, c='green', marker='s')
+        # plot voxels with correct orientation
+        ax.scatter(x, z, -y, c='brown', marker='s')
+        ax.scatter(x1, z1, -y1, c='green', marker='s')
 
         # Set the limits for the axes
         ax.set_xlim(0, self.model.shape[0])
-        ax.set_ylim(0, self.model.shape[1])
-        ax.set_zlim(0, self.model.shape[2])
+        ax.set_ylim(0, self.model.shape[2])
+        ax.set_zlim(-self.model.shape[1], 0)
 
         # Set labels for the axes
         ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
+        ax.set_ylabel('Z')
+        ax.set_zlabel('Y')
 
         # Show the plot
         plt.show()
