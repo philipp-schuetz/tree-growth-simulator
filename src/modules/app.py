@@ -22,5 +22,6 @@ class App:
                     )
                     self.model.set_light_sides(self.ui.get_light_sides())
                     self.model.generate_model()
-                case 'export':
-                    self.model.generate_images()
+                case 'show':
+                    # self.model.generate_images()
+                    self.model.mathplotlib_plot()

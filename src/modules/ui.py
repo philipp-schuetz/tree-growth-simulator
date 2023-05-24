@@ -44,7 +44,7 @@ class Ui:
                 ]
             ]), sg.Frame(title='Buttons', layout=[
                 [sg.Button('Start')],
-                [sg.Button('Export to PNGs')]
+                [sg.Button('Show')]
             ])]
         ]
 
@@ -73,9 +73,8 @@ class Ui:
                     values['top']
                 ]
                 return 'start'
-            case 'Export to PNGs':
-                sg.popup('Please be patient while the images are being generated.', title='Export to PNGs')
-                return 'export'
+            case 'Show':
+                return 'show'
             case sg.WIN_CLOSED:
                 self.close_window()
 
