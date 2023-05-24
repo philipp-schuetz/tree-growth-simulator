@@ -30,10 +30,8 @@ class Config():
                 "width": 249,
                 "height": 498
             },
-            "l_system": {
-                "iterations": 8,
+            "structure": {
                 "radius": 0,
-                "axiom": "P",
             },
             "image_generation": {
                 "add_leafs": True
@@ -129,23 +127,11 @@ class Config():
             raise ValueError('minimum light level must be positive')
         else:
             return minimum
-
-    def get_iterations(self) -> int:
-        """return l-system iteration count"""
-        self.load()
-        iterations = self.config['l_system']['iterations']
-
-        # data validation
-        if not isinstance(iterations, int):
-            raise ValueError('iterations must be an integer')
-        elif iterations < 1:
-            raise ValueError('iterations must be at least 1')
-        else:
-            return iterations
     
     def get_radius(self) -> int:
+        """get base radius of tree"""
         self.load()
-        radius = self.config['l_system']['radius']
+        radius = self.config['structure']['radius']
         # data validation
         if not isinstance(radius, int):
             raise ValueError('radius must be an integer')

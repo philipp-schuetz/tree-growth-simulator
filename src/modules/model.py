@@ -34,19 +34,16 @@ class Model:
         self.material = self.id_wood
         self.radius = config.get_radius()
 
-        self.sentence = '' # l-system sentence
-        self.iterations = 0
-        self.rules = {}
-
         # set first positions
         self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
+        self.current_direction = 0
         self.position = self.start_position
-        self.saved = []
+
+        self.saved_position = []
+        self.saved_direction = []
+        self.saved_radius = []
 
         self.light = light.Light(self.model)
-
-        # l-system data
-        self.set_iterations()
 
     def set_light_sides(self, sides: list[bool]):
         """format of sides: [front, back, left, right, top]"""
@@ -71,9 +68,6 @@ class Model:
         self.nutrients = nutrients
 
         self.light.set_light(light)
-    
-    def set_iterations(self):
-        self.iterations = config.get_iterations()
 
     def save(self):
         """save model in file"""
@@ -88,15 +82,6 @@ class Model:
 
     # cut the forward move length in half every time
 
-    def apply_rules(self):
-        """apply a rule for each character in the sentence (random rule if multiple exist)"""
-        new_sentence = ''
-        for letter in self.sentence:
-            if letter in self.rules:
-                new_sentence += random.choice(self.rules[letter])
-            else:
-                new_sentence += letter
-        self.sentence = new_sentence
 
     def place_voxel(self):
         """set current voxel(s) to specified material"""
@@ -135,6 +120,75 @@ class Model:
                 return False
         except IndexError:
             return False
+        
+    def forward(self):
+        """move one voxel in the current direction"""
+        match self.current_direction:
+            case 0:# positive layer
+                self.position[0] = self.position[0]+1
+            case 1: # negative voxel
+                self.position[2] = self.position[2]-1
+            case 2:# negative layer
+                self.position[0] = self.position[0]-1
+            case 3: # positive voxel
+                self.position[2] = self.position[2]+1
+    
+    def right(self):
+        """turn right 90°"""
+        self.current_direction += 1
+        if self.current_direction > 3:   
+            self.current_direction = 0
+
+    def left(self):
+        """turn left 90°"""
+        self.current_direction -= 1
+        if self.current_direction  < 0:
+            self.current_direction = 3
+
+    def up(self):
+        """move up one voxel"""
+        self.position[1] += 1
+    
+    def down(self):
+        """move down one voxel"""
+        self.position[1] -= 1
+    
+    def set_radius(self, amount:int):
+        """change radius size by the set amount"""
+        radius = self.radius
+        radius += amount
+        if self.radius >= 0:
+            self.radius = radius
+        else:
+            return
+    
+    def save_position(self):
+        """save current position"""
+        self.saved_position.append(self.position)
+
+    def get_position(self):
+        """get the position last saved"""
+        if len(self.saved_position) > 0:
+            self.position = self.saved_position.pop(-1)
+
+    def save_direction(self):
+        """save current direction"""
+        self.saved_direction.append(self.current_direction)
+
+    def get_direction(self):
+        """get the direction last saved"""
+        if len(self.saved_direction) > 0:
+            self.current_direction = self.saved_direction.pop(-1)
+    
+    def save_radius(self):
+        """save current radius"""
+        self.saved_position.append(self.radius)
+
+    def get_radius(self):
+        """get the radius last saved"""
+        if len(self.saved_radius) > 0:
+            self.radius = self.saved_radius.pop(-1)
+
 
     def generate_model(self):
         # TODO check values of all modifiers before generating
@@ -146,53 +200,6 @@ class Model:
         # ---- part1 - trunk ----
         # get initial radius from config
 
-
-
-
-        iteration = 0
-        while iteration < self.iterations:
-            self.apply_rules()
-            iteration += 1
-            print(f'sentence: {self.sentence}; iteration: {iteration}/{self.iterations}')
-
-        current_direction = 0
-
-        for letter in self.sentence:
-            match letter:
-                case 'P':
-                    self.place_voxel()
-                case 'F': # forward
-                    match current_direction:
-                        case 0:# positive layer
-                            self.position[0] = self.position[0]+1
-                        case 1: # negative voxel
-                            self.position[2] = self.position[2]-1
-                        case 2:# negative layer
-                            self.position[0] = self.position[0]-1
-                        case 3: # positive voxel
-                            self.position[2] = self.position[2]+1
-                case '+': # turn right 90°
-                    current_direction += 1
-                    if current_direction > 3:
-                        current_direction = 0
-                case '-': # turn left 90°
-                    current_direction -= 1
-                    if current_direction  < 0:
-                        current_direction = 3
-                case 'c': # center Downward
-                    self.position[1] = self.position[1]+1
-                case 'C': # center Upward
-                    self.position[1] = self.position[1]-1
-                case 'r': # radius smaller
-                    if self.radius != 0:
-                        self.radius -= 1
-                case 'R': # radius larger
-                    self.radius += 1
-                case '[': # save position, orientation
-                    self.saved.append([self.position, current_direction])
-                case ']': # get saved position and orientation
-                    self.position = self.saved.pop(-1)[0]
-                    current_direction = self.saved.pop(-1)[1]
 
 
         # ---- generate leafs ----
@@ -209,8 +216,6 @@ class Model:
 
     # ---------------- display model ----------------
     def mathplotlib_plot(self):
-        # TODO get ids from config
-
         # Plot the resulting tree model
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
