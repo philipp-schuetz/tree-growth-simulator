@@ -30,15 +30,21 @@ class Config():
                 "width": 249,
                 "height": 498
             },
-            "structure": {
-                "radius": 0,
-            },
             "image_generation": {
                 "add_leafs": True
             },
             "light": {
                 "minimum": 20
-            }
+            },
+            "water": {
+                "minimum": 20
+            },
+            "temperature": {
+                "minimum": 20
+            },
+            "nutrients": {
+                "minimum": 20
+            },
         }
 
         # holds config loaded from file
@@ -115,30 +121,24 @@ class Config():
         else:
             return self.config['model_dimensions']
 
-    def get_minimum_light_level(self) -> int:
-        """return the minimum light level needed to spawn wood or leafs"""
+    def get_minimum_values(self) -> list[int]:
+        """return the minimum values of all modifiers for the tree to grow"""
         self.load()
 
-        minimum = self.config['light']['minimum']
-        # data validation
-        if not isinstance(minimum, int):
-            raise ValueError('minimum light level must be an integer')
-        elif minimum <= 0:
-            raise ValueError('minimum light level must be positive')
-        else:
-            return minimum
-    
-    def get_radius(self) -> int:
-        """get base radius of tree"""
-        self.load()
-        radius = self.config['structure']['radius']
-        # data validation
-        if not isinstance(radius, int):
-            raise ValueError('radius must be an integer')
-        elif radius < 0:
-            raise ValueError('radius must be positive')
-        else:
-            return radius
+        minimum_values = [
+            self.config['light']['minimum'],
+            self.config['water']['minimum'],
+            self.config['temperature']['minimum'],
+            self.config['nutrients']['minimum']
+        ]
+        for minimum in minimum_values:
+            # data validation
+            if not isinstance(minimum, int):
+                raise ValueError('minimum values need to be an integer')
+            elif minimum <= 0:
+                raise ValueError('minimum values need to be be positive')
+        
+        return minimum_values
     
     def get_add_leafs(self) -> bool:
         """return True if image generation should use leafs, else return False"""
