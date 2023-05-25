@@ -29,9 +29,15 @@ class Model:
         self.temperature = -1
         self.nutrients = -1
 
+        # minimum values
+        self.minimum_light = -1
+        self.minimum_water = -1
+        self.minimum_temperature = -1
+        self.minimum_nutrients = -1
+
         # base material and radius for tree generation
         self.material = self.id_wood
-        self.radius = config.get_radius()
+        self.radius = 0
 
         # set first positions
         self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
@@ -43,6 +49,17 @@ class Model:
         self.saved_radius = []
 
         self.light = light.Light(self.model)
+        # initial light calculation
+        self.light.calculate()
+
+    def set_minimum_values(self):
+        """set minimum values for modifiers"""
+        minimum_values = config.get_minimum_values()
+
+        self.minimum_light = minimum_values[0]
+        self.minimum_water = minimum_values[1]
+        self.minimum_temperature = minimum_values[2]
+        self.minimum_nutrients = minimum_values[3]
 
     def set_light_sides(self, sides: list[bool]):
         """format of sides: [front, back, left, right, top]"""
@@ -201,22 +218,41 @@ class Model:
         # all generator values must reach a specific minimum (or maximum) value to start growing
         # reaching a specific value could add specific rules for generation or modify the iterations variable
 
+        # start_radius
+        self.radius = 0
+        trunk_height = 80
+        branch_iterations = 80
+        # defines how often the trunk radius gets smaller
+        radius_mod = 2
+
+        # ---- calculate and apply modifiers ----
+        # abort when minimum values are not reached
+        if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
+            return
+        elif self.light.lightarray[self.position] < self.minimum_light:
+            return
+        
+
         # ---- generate structure ----
-        run = True
-        while run:
-            for i in range(300):
-                self.place_voxel()
-                self.up()
+        # trunk
+        trunk = 0
+        while trunk < trunk_height:
+            self.place_voxel()
+            self.up()
+            if trunk % radius_mod == 0:
                 self.set_radius(-1)
-            run = False
-            
+            trunk += 1
+
+        iteration = 0
+        while iteration < branch_iterations:
+            iteration += 1
 
         # ---- generate leafs ----
         for layer in range(0, self.width):
             for row in range(0, self.height):
                 for voxel in range(0, self.width):
                     # check if voxel is next to wood and minimum lightlevel is reached
-                    if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= config.get_minimum_light_level():
+                    if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= self.minimum_light:
                         # add leaf
                         self.model[layer,row,voxel] = self.id_leaf
                         # recalculate lightlevel
