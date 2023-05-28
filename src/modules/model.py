@@ -50,7 +50,7 @@ class Model:
 
         self.light = light.Light(self.model)
         # initial light calculation
-        self.light.calculate()
+        # self.light.calculate() TODO
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
@@ -101,22 +101,20 @@ class Model:
 
     def place_voxel(self):
         """set current voxel(s) to specified material"""
-        if self.radius > 0:
-            # row stays the same, radius defines the width of the tree
-            # for layer in range(self.position[0]-self.radius, self.position[0]+self.radius):
-            #     for voxel in range(self.position[2]-self.radius, self.position[2]+self.radius):
-            #         self.model[layer,self.position[1],voxel] = self.material
+        try:
+            if self.radius > 0:
+                for layer in range(self.width):
+                    for voxel in range(self.width):
+                        distance = np.sqrt((layer - self.position[0])**2 + (voxel - self.position[2])**2)
+                        if distance <= self.radius:
+                            self.model[layer,self.position[1],voxel] = self.material
 
-            for layer in range(self.width):
-                for voxel in range(self.width):
-                    distance = np.sqrt((layer - self.position[0])**2 + (voxel - self.position[2])**2)
-                    if distance <= self.radius:
-                        self.model[layer,self.position[1],voxel] = self.material
-
-        elif self.radius == 0:
-            self.model[self.position[0],self.position[1],self.position[2]] = self.material
-        else:
-            raise ValueError("radius for voxel placement can't be negative")
+            elif self.radius == 0:
+                self.model[self.position[0],self.position[1],self.position[2]] = self.material
+            else:
+                raise ValueError("radius for voxel placement can't be negative")
+        except IndexError as e:
+            print(e)
         
     def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
         """return True if voxel has given material next to it"""
@@ -212,6 +210,43 @@ class Model:
         if len(self.saved_radius) > 0:
             self.radius = self.saved_radius.pop(-1)
 
+    def generate_branches(self, branch_length, branch_radius):
+        if branch_length <= 0 or not self.is_within_bounds():
+            return
+
+        # Generate current branch
+        for i in range(branch_length):
+            self.place_voxel()
+            self.forward()
+
+        # Branch again
+        self.right()  # Turn right 90°
+        self.set_radius(-1)  # Reduce radius by one
+        self.generate_branches(branch_length-1, branch_radius)  # Recursive call for the new branch
+
+        # Return to the main branch
+        self.set_radius(1)  # Increase radius by one
+        self.left()  # Turn left 90°
+        for i in range(branch_length):
+            self.forward()
+
+        # Branch again on the other side
+        self.left()  # Turn left 90°
+        self.set_radius(-1)  # Reduce radius by one
+        self.generate_branches(branch_length-1, branch_radius)  # Recursive call for the new branch
+
+        # Return to the main branch
+        self.set_radius(1)  # Increase radius by one
+        self.right()  # Turn right 90°
+        for i in range(branch_length):
+            self.forward()
+
+    def is_within_bounds(self):
+        """Check if the current position is within the bounds of the model"""
+        x, y, z = self.position
+        model_width, model_height, model_depth = self.model.shape
+        return 0 <= x < model_width and 0 <= y < model_height and 0 <= z < model_depth
+
 
     def generate_model(self):
         # TODO check values of all modifiers before generating
@@ -222,41 +257,67 @@ class Model:
         self.radius = 0
         trunk_height = 80
         branch_iterations = 80
+        branch_length = 8
         # defines how often the trunk radius gets smaller
         radius_mod = 2
 
         # ---- calculate and apply modifiers ----
-        # abort when minimum values are not reached
-        if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
-            return
-        elif self.light.lightarray[self.position] < self.minimum_light:
-            return
+        # abort when minimum values are not reached TODO uncomment
+        # if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
+        #     return
+        # elif self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
+        #     return
         
 
-        # ---- generate structure ----
-        # trunk
         trunk = 0
         while trunk < trunk_height:
             self.place_voxel()
             self.up()
-            if trunk % radius_mod == 0:
+            if trunk % radius_mod == 0:# TODO fix error with trunk gen, TODO no "up" while branching (all in plane)
                 self.set_radius(-1)
+                self.generate_branches(branch_length, self.radius)
             trunk += 1
 
-        iteration = 0
-        while iteration < branch_iterations:
-            iteration += 1
 
-        # ---- generate leafs ----
-        for layer in range(0, self.width):
-            for row in range(0, self.height):
-                for voxel in range(0, self.width):
-                    # check if voxel is next to wood and minimum lightlevel is reached
-                    if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= self.minimum_light:
-                        # add leaf
-                        self.model[layer,row,voxel] = self.id_leaf
-                        # recalculate lightlevel
-                        self.light.calculate()
+        # # ---- generate structure ----
+        # # trunk
+        # trunk = 0
+        # while trunk < trunk_height:
+        #     self.place_voxel()
+        #     self.up()
+        #     if trunk % radius_mod == 0:
+        #         self.set_radius(-1)
+        #     trunk += 1
+
+        # iteration = 0
+        # while iteration < branch_iterations:
+        #     self.save_position()
+        #     self.save_direction()
+        #     self.save_radius()
+
+        #     self.forward()
+        #     self.place_voxel()
+        #     self.up()
+        #     self.forward()
+        #     self.place_voxel()
+        #     self.up()
+
+        #     if self.radius > 0:
+        #         self.set_radius(-1)
+
+        #     iteration += 1
+
+
+        # ---- generate leafs ---- TODO uncomment
+        # for layer in range(0, self.width):
+        #     for row in range(0, self.height):
+        #         for voxel in range(0, self.width):
+        #             # check if voxel is next to wood and minimum lightlevel is reached
+        #             if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= self.minimum_light:
+        #                 # add leaf
+        #                 self.model[layer,row,voxel] = self.id_leaf
+        #                 # recalculate lightlevel
+        #                 self.light.calculate()
         print('done')
 
     # ---------------- display model ----------------
