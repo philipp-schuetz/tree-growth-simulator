@@ -30,23 +30,21 @@ class Config():
                 "width": 249,
                 "height": 498
             },
-            "l_system": {
-                "iterations": 8,
-                "radius": 0,
-                "axiom": "P",
-                "rules": [
-                    {"letter": "P", "new_letters": "F[+cP][-cP]"},
-                    {"letter": "F", "new_letters": "F"},
-                    {"letter": "c", "new_letters": "c"},
-                    {"letter": "C", "new_letters": "C"},
-                ]
-            },
             "image_generation": {
                 "add_leafs": True
             },
             "light": {
                 "minimum": 20
-            }
+            },
+            "water": {
+                "minimum": 20
+            },
+            "temperature": {
+                "minimum": 20
+            },
+            "nutrients": {
+                "minimum": 20
+            },
         }
 
         # holds config loaded from file
@@ -123,68 +121,24 @@ class Config():
         else:
             return self.config['model_dimensions']
 
-    def get_minimum_light_level(self) -> int:
-        """return the minimum light level needed to spawn wood or leafs"""
+    def get_minimum_values(self) -> list[int]:
+        """return the minimum values of all modifiers for the tree to grow"""
         self.load()
 
-        minimum = self.config['light']['minimum']
-        # data validation
-        if not isinstance(minimum, int):
-            raise ValueError('minimum light level must be an integer')
-        elif minimum <= 0:
-            raise ValueError('minimum light level must be positive')
-        else:
-            return minimum
-
-    def get_iterations(self) -> int:
-        """return l-system iteration count"""
-        self.load()
-        iterations = self.config['l_system']['iterations']
-
-        # data validation
-        if not isinstance(iterations, int):
-            raise ValueError('iterations must be an integer')
-        elif iterations < 1:
-            raise ValueError('iterations must be at least 1')
-        else:
-            return iterations
-    
-    def get_radius(self) -> int:
-        self.load()
-        radius = self.config['l_system']['radius']
-        # data validation
-        if not isinstance(radius, int):
-            raise ValueError('radius must be an integer')
-        elif radius < 0:
-            raise ValueError('radius must be positive')
-        else:
-            return radius
-
-    def get_axiom(self) -> str:
-        """return start letter for l-system"""
-        self.load()
-        start = self.config['l_system']['axiom']
-
-        # data validation
-        if not isinstance(start, str):
-            raise ValueError('start must be a string')
-        else:
-            return start
+        minimum_values = [
+            self.config['light']['minimum'],
+            self.config['water']['minimum'],
+            self.config['temperature']['minimum'],
+            self.config['nutrients']['minimum']
+        ]
+        for minimum in minimum_values:
+            # data validation
+            if not isinstance(minimum, int):
+                raise ValueError('minimum values need to be an integer')
+            elif minimum <= 0:
+                raise ValueError('minimum values need to be be positive')
         
-    def get_rules(self) -> list[dict[str,str]]:
-        """return rules for l-system"""
-        self.load()
-        rules = self.config['l_system']['rules']
-
-        # data validation
-        for rule in rules:
-            if not isinstance(rule['letter'], str):
-                raise ValueError('letter must be a string')
-            elif len(rule['letter']) > 1:
-                raise ValueError('letter must be a single character')
-            elif not isinstance(rule['new_letters'], str):
-                raise ValueError('new_letters must be a string')
-        return rules
+        return minimum_values
     
     def get_add_leafs(self) -> bool:
         """return True if image generation should use leafs, else return False"""
@@ -197,5 +151,3 @@ class Config():
         return boolean
 
 config = Config()
-# print(get_model_dimensions())
-# print(get_rules())
