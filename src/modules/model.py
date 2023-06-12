@@ -203,63 +203,67 @@ class Model:
     
     def save_radius(self):
         """save current radius"""
-        self.saved_position.append(self.radius)
+        self.saved_radius.append(self.radius)
 
     def get_radius(self):
         """get the radius last saved"""
         if len(self.saved_radius) > 0:
             self.radius = self.saved_radius.pop(-1)
+    
+    def save_positioning(self):
+        """save current position, direction and radius"""
+        self.save_position()
+        self.save_direction()
+        self.save_radius()
+
+    def get_positioning(self):
+        """get saved position, direction and radius"""
+        self.get_position()
+        self.get_direction()
+        self.get_radius()
 
     def generate_branches(self, branch_length, branch_radius):
-        if branch_length <= 0 or not self.is_within_bounds():
+        if branch_length <= 1 or not self.is_within_bounds():
             return
 
         # Generate current branch
         for i in range(branch_length):
+            self.forward()
             self.place_voxel()
-            self.forward()
 
-        # Branch again
+        # generate child branch on the right side
+        self.save_positioning()
         self.right()  # Turn right 90°
         self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1, branch_radius)  # Recursive call for the new branch
+        self.generate_branches(branch_length-1, branch_radius)
 
-        # Return to the main branch
-        self.set_radius(1)  # Increase radius by one
-        self.left()  # Turn left 90°
-        for i in range(branch_length):
-            self.forward()
+        # Return to the main branch, and branch forward
+        self.get_positioning()
+        self.save_positioning()
 
-        # Branch again on the other side
-        self.left()  # Turn left 90°
+        # for i in range(branch_length):
+        #     self.forward()
+
+        # generate child branch on the left side
+        self.get_positioning()
+        self.left()
         self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1, branch_radius)  # Recursive call for the new branch
-
-        # Return to the main branch
-        self.set_radius(1)  # Increase radius by one
-        self.right()  # Turn right 90°
-        for i in range(branch_length):
-            self.forward()
+        self.generate_branches(branch_length-1, branch_radius)
 
     def is_within_bounds(self):
         """Check if the current position is within the bounds of the model"""
         x, y, z = self.position
-        model_width, model_height, model_depth = self.model.shape
-        return 0 <= x < model_width and 0 <= y < model_height and 0 <= z < model_depth
+        return 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.width
 
 
     def generate_model(self):
-        # TODO check values of all modifiers before generating
-        # all generator values must reach a specific minimum (or maximum) value to start growing
-        # reaching a specific value could add specific rules for generation or modify the iterations variable
-
-        # start_radius
-        self.radius = 0
-        trunk_height = 80
+        self.radius = 30 # start_radius
+        trunk_height = 400
         branch_iterations = 80
         branch_length = 8
         # defines how often the trunk radius gets smaller
         radius_mod = 2
+        min_branching_height = 200 # height at which branches start appearing
 
         # ---- calculate and apply modifiers ----
         # abort when minimum values are not reached TODO uncomment
@@ -271,42 +275,16 @@ class Model:
 
         trunk = 0
         while trunk < trunk_height:
+            self.get_positioning()
             self.place_voxel()
             self.up()
-            if trunk % radius_mod == 0:# TODO fix error with trunk gen, TODO no "up" while branching (all in plane)
+            if trunk % 16 == 0:
                 self.set_radius(-1)
+            self.save_positioning()
+            if trunk % radius_mod == 0 and trunk > min_branching_height:
+                self.set_radius(-20)
                 self.generate_branches(branch_length, self.radius)
             trunk += 1
-
-
-        # # ---- generate structure ----
-        # # trunk
-        # trunk = 0
-        # while trunk < trunk_height:
-        #     self.place_voxel()
-        #     self.up()
-        #     if trunk % radius_mod == 0:
-        #         self.set_radius(-1)
-        #     trunk += 1
-
-        # iteration = 0
-        # while iteration < branch_iterations:
-        #     self.save_position()
-        #     self.save_direction()
-        #     self.save_radius()
-
-        #     self.forward()
-        #     self.place_voxel()
-        #     self.up()
-        #     self.forward()
-        #     self.place_voxel()
-        #     self.up()
-
-        #     if self.radius > 0:
-        #         self.set_radius(-1)
-
-        #     iteration += 1
-
 
         # ---- generate leafs ---- TODO uncomment
         # for layer in range(0, self.width):
