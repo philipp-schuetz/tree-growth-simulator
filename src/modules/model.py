@@ -34,6 +34,7 @@ class Model:
         self.minimum_water = -1
         self.minimum_temperature = -1
         self.minimum_nutrients = -1
+        self.set_minimum_values()
 
         # base material and radius for tree generation
         self.material = self.id_wood
@@ -42,7 +43,7 @@ class Model:
         # set first positions
         self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
         self.current_direction = 0
-        self.position = self.start_position
+        self.position = self.start_position.copy()
 
         self.saved_position = []
         self.saved_direction = []
@@ -51,8 +52,6 @@ class Model:
         self.radius_mode = 'trunk'
 
         self.light = light.Light(self.model)
-        # initial light calculation
-        # self.light.calculate() TODO
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
@@ -146,13 +145,13 @@ class Model:
     def forward(self):
         """move one voxel in the current direction"""
         match self.current_direction:
-            case 0:# positive layer
+            case 0:# positive layer - forward
                 self.position[0] = self.position[0]+1
-            case 1: # negative voxel
+            case 1: # negative voxel - right
                 self.position[2] = self.position[2]-1
-            case 2:# negative layer
+            case 2:# negative layer - back
                 self.position[0] = self.position[0]-1
-            case 3: # positive voxel
+            case 3: # positive voxel - left
                 self.position[2] = self.position[2]+1
     
     def right(self):
@@ -179,7 +178,7 @@ class Model:
         """change radius size by the set amount"""
         radius = self.radius
         radius += amount
-        if radius >= 0:
+        if radius >= 1:
             self.radius = radius
         else:
             return
@@ -253,27 +252,61 @@ class Model:
 
 
     def generate_model(self):
+        # initial light calculation
+        self.light.calculate()
+
         # ---- calculate and apply modifiers ----
-        # abort when minimum values are not reached TODO uncomment
-        # if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
-        #     return
-        # elif self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
-        #     return
+        # abort when minimum values are not reached
+        if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
+            return
+        elif self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
+            return
+        print(self.light.lightarray[self.position[0], self.position[1], self.position[2]])
 
         self.radius = 20 # start_radius
         branch_length = 20
+        iterations = 6
         min_branching_height = 200 # height at which branches start appearing
+        branching_position = []
+        branching_radius = []
+        branching_position_tmp = []
+        branching_radius_tmp = []
         
         # generate main trunk
         for i in range(min_branching_height):
-            self.get_positioning()
             self.place_voxel()
             self.up()
             if i % 20 == 0:
                 self.set_radius(-1)
+        branching_position.append(self.position)
+        branching_radius.append(self.radius)
+        
+        print(f'branch radius: {self.radius}')
+        for i in range(iterations):
+            for bp in range(len(branching_position)):
+                start_pos = branching_position[bp]
+                start_radius = branching_radius[bp]
 
-        self.save_positioning()
-        self.generate_branches(branch_length)
+                for d in range(4):
+                    self.position = start_pos.copy()
+                    self.radius = start_radius
+                    self.current_direction = d
+                    for m in range(branch_length):
+                        self.forward()
+                        self.place_voxel()
+                        if m % 1 == 0:
+                            self.up()
+                            self.up()
+                        self.set_radius(-1)
+                    # save branch end
+                    branching_position_tmp.append(self.position)
+                    branching_radius_tmp.append(self.radius)
+
+            branching_position = branching_position_tmp.copy()
+            branching_position_tmp = []
+            branching_radius = branching_radius_tmp.copy()
+            branching_radius_tmp = []
+
 
         # ---- generate leafs ---- TODO uncomment
         # for layer in range(0, self.width):
