@@ -25,6 +25,7 @@ class Model:
         self.model = np.zeros((self.width, self.height, self.width))
 
         # modifiers
+        self.light_mod = -1
         self.water = -1
         self.temperature = -1
         self.nutrients = -1
@@ -80,6 +81,7 @@ class Model:
     
     def set_modifiers(self, light:int, water:int, temperature:int, nutrients:int):
         """set modifiers from ui"""
+        self.light_mod = light
         self.water = water
         self.temperature = temperature
         self.nutrients = nutrients
@@ -228,11 +230,43 @@ class Model:
         return 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.width
     
     def light_minimum_reached(self) -> bool:
-        self.light.calculate(self.model)
-        if self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
-            return False
-        else:
+        directions = [(-1, 0, 0), (1, 0, 0), (0, 0, -1), (0, 0, 1), (0, -1, 0)]
+        # front back left right top
+        if 'front' not in self.light.activated_sides:
+            directions[0] = 0
+        if 'back' not in self.light.activated_sides:
+            directions[1] = 0
+        if 'left' not in self.light.activated_sides:
+            directions[2] = 0
+        if 'right' not in self.light.activated_sides:
+            directions[3] = 0
+        if 'top' not in self.light.activated_sides:
+            directions[4] = 0
+
+        
+        total_light = 0
+
+        for direction in directions:
+            if direction == 0:
+                continue
+            object_count = 0
+            for x in range(1, 250):
+                dx, dy, dz = direction
+                new_x, new_y, new_z = self.position[0] + dx*x, self.position[1] + dy*x, self.position[2] + dz*x
+
+                try:
+                    if self.model[new_x,new_y,new_z] != 0:
+                        object_count += 1
+                except IndexError as e:
+                    print(f'light calc: {e}')
+
+            if object_count == 0:
+                total_light += self.light_mod
+        
+        if total_light/2 >= self.minimum_light:
             return True
+        else:
+            return False
 
 
     def generate_model(self):
@@ -275,7 +309,14 @@ class Model:
         
         print(f'branch radius: {self.radius}')
         for i in range(iterations):
-            for bp in range(len(branching_position)): # random choice not in range, set positions = 0 in array that one position isnt taken twice
+            random.shuffle(branching_position)
+            # remove random items from the list
+            # for x in range(int(len(branching_position)/4)):
+            #     if i == 0:
+            #         continue
+            #     branching_position.pop(random.randrange(len(branching_position)))
+            
+            for bp in range(len(branching_position)):
                 start_pos = branching_position[bp]
                 start_radius = branching_radius[bp]
 
@@ -294,8 +335,8 @@ class Model:
                     # branch_length += random.randrange(-2,i)
                     for m in range(int(branch_length)):
                         self.forward()
-                        # if not self.light_minimum_reached():
-                        #     break
+                        if not self.light_minimum_reached():
+                            break
                         self.place_voxel()
                         for du in range(random.randrange(8)):
                             self.up()
