@@ -51,7 +51,7 @@ class Model:
 
         self.radius_mode = 'trunk'
 
-        self.light = light.Light(self.model)
+        self.light = light.Light()
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
@@ -222,58 +222,50 @@ class Model:
         self.get_direction()
         self.get_radius()
 
-    def generate_branches(self, branch_length):
-        # check for all events, that could result in terminated branching
-        if branch_length < 1 or not self.is_within_bounds():
-            return
-
-        # Generate current branch
-        for i in range(branch_length):
-            self.forward()
-            self.place_voxel()
-        self.up()
-
-        # generate child branch on the right side
-        self.save_positioning()
-        self.right()  # Turn right 90°
-        self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1)
-
-        # generate child branch on the left side
-        self.get_positioning()
-        self.left()
-        self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1)
-
     def is_within_bounds(self):
         """Check if the current position is within the bounds of the model"""
         x, y, z = self.position
         return 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.width
+    
+    def light_minimum_reached(self) -> bool:
+        self.light.calculate(self.model)
+        if self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
+            return False
+        else:
+            return True
 
 
     def generate_model(self):
-        # initial light calculation
-        self.light.calculate()
+        self.radius = 5 # start_radius
+        branch_length = 20
+        iterations = 6
+        min_branching_height = 40 # height at which branches start appearing
 
         # ---- calculate and apply modifiers ----
         # abort when minimum values are not reached
         if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
             return
-        elif self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
-            return
-        print(self.light.lightarray[self.position[0], self.position[1], self.position[2]])
+        # elif not self.light_minimum_reached():
+        #     return
+        # print(self.light.lightarray[self.position[0], self.position[1], self.position[2]])
 
-        self.radius = 20 # start_radius
-        branch_length = 20
-        iterations = 6
-        min_branching_height = 200 # height at which branches start appearing
+
+
+        if self.water/100 <= 1.5:
+            branch_length *= self.water/100
+            min_branching_height *= self.water/100
+        elif self.water/100 > 1.5:
+            branch_length *= 1-self.water/100
+            # leafes?
+
+
         branching_position = []
         branching_radius = []
         branching_position_tmp = []
         branching_radius_tmp = []
         
         # generate main trunk
-        for i in range(min_branching_height):
+        for i in range(int(min_branching_height)):
             self.place_voxel()
             self.up()
             if i % 20 == 0:
@@ -283,20 +275,32 @@ class Model:
         
         print(f'branch radius: {self.radius}')
         for i in range(iterations):
-            for bp in range(len(branching_position)):
+            for bp in range(len(branching_position)): # random choice not in range, set positions = 0 in array that one position isnt taken twice
                 start_pos = branching_position[bp]
                 start_radius = branching_radius[bp]
 
                 for d in range(4):
+                    # chance to skip branch
+                    if random.randrange(64) == 0 and iterations < 2:
+                        continue
+                    elif random.randrange(4) == 0 and iterations >= 2 and iterations < 4:
+                        continue
+                    elif random.randrange(2) == 0 and iterations >= 4:
+                        continue
+                    
                     self.position = start_pos.copy()
                     self.radius = start_radius
                     self.current_direction = d
-                    for m in range(branch_length):
+                    # branch_length += random.randrange(-2,i)
+                    for m in range(int(branch_length)):
                         self.forward()
+                        # if not self.light_minimum_reached():
+                        #     break
                         self.place_voxel()
-                        if m % 1 == 0:
+                        for du in range(random.randrange(8)):
                             self.up()
-                            self.up()
+                        for dd in range(random.randrange(4)):
+                            self.down()
                         self.set_radius(-1)
                     # save branch end
                     branching_position_tmp.append(self.position)
