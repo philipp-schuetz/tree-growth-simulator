@@ -48,6 +48,8 @@ class Model:
         self.saved_direction = []
         self.saved_radius = []
 
+        self.radius_mode = 'trunk'
+
         self.light = light.Light(self.model)
         # initial light calculation
         # self.light.calculate() TODO
@@ -102,14 +104,13 @@ class Model:
     def place_voxel(self):
         """set current voxel(s) to specified material"""
         try:
-            if self.radius > 0:
+            if self.radius > 1:
                 for layer in range(self.width):
                     for voxel in range(self.width):
                         distance = np.sqrt((layer - self.position[0])**2 + (voxel - self.position[2])**2)
                         if distance <= self.radius:
                             self.model[layer,self.position[1],voxel] = self.material
-
-            elif self.radius == 0:
+            elif self.radius == 1:
                 self.model[self.position[0],self.position[1],self.position[2]] = self.material
             else:
                 raise ValueError("radius for voxel placement can't be negative")
@@ -222,33 +223,28 @@ class Model:
         self.get_direction()
         self.get_radius()
 
-    def generate_branches(self, branch_length, branch_radius):
-        if branch_length <= 1 or not self.is_within_bounds():
+    def generate_branches(self, branch_length):
+        # check for all events, that could result in terminated branching
+        if branch_length < 1 or not self.is_within_bounds():
             return
 
         # Generate current branch
         for i in range(branch_length):
             self.forward()
             self.place_voxel()
+        self.up()
 
         # generate child branch on the right side
         self.save_positioning()
         self.right()  # Turn right 90°
         self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1, branch_radius)
-
-        # Return to the main branch, and branch forward
-        self.get_positioning()
-        self.save_positioning()
-
-        # for i in range(branch_length):
-        #     self.forward()
+        self.generate_branches(branch_length-1)
 
         # generate child branch on the left side
         self.get_positioning()
         self.left()
         self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1, branch_radius)
+        self.generate_branches(branch_length-1)
 
     def is_within_bounds(self):
         """Check if the current position is within the bounds of the model"""
@@ -257,34 +253,27 @@ class Model:
 
 
     def generate_model(self):
-        self.radius = 30 # start_radius
-        trunk_height = 400
-        branch_iterations = 80
-        branch_length = 8
-        # defines how often the trunk radius gets smaller
-        radius_mod = 2
-        min_branching_height = 200 # height at which branches start appearing
-
         # ---- calculate and apply modifiers ----
         # abort when minimum values are not reached TODO uncomment
         # if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
         #     return
         # elif self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
         #     return
-        
 
-        trunk = 0
-        while trunk < trunk_height:
+        self.radius = 20 # start_radius
+        branch_length = 20
+        min_branching_height = 200 # height at which branches start appearing
+        
+        # generate main trunk
+        for i in range(min_branching_height):
             self.get_positioning()
             self.place_voxel()
             self.up()
-            if trunk % 16 == 0:
+            if i % 20 == 0:
                 self.set_radius(-1)
-            self.save_positioning()
-            if trunk % radius_mod == 0 and trunk > min_branching_height:
-                self.set_radius(-20)
-                self.generate_branches(branch_length, self.radius)
-            trunk += 1
+
+        self.save_positioning()
+        self.generate_branches(branch_length)
 
         # ---- generate leafs ---- TODO uncomment
         # for layer in range(0, self.width):
