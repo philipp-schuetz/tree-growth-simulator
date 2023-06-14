@@ -2,6 +2,7 @@ import numpy as np
 from modules.config import config
 
 class Light:
+    """class partly deprecated"""
     def __init__(self):
         # {0: 100, 1: 0, 2: 50, 3: 0}
         self.translucency = {}
@@ -108,4 +109,3 @@ class Light:
                                 light_back = self.lightarray[layer,row-1,voxel]
                                 translucency_back = self.translucency[model[layer,row-1,voxel]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
-                                

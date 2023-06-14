@@ -116,7 +116,8 @@ class Model:
             else:
                 raise ValueError("radius for voxel placement can't be negative")
         except IndexError as e:
-            print(e)
+            # print(e)
+            pass
         
     def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
         """return True if voxel has given material next to it"""
@@ -258,7 +259,8 @@ class Model:
                     if self.model[new_x,new_y,new_z] != 0:
                         object_count += 1
                 except IndexError as e:
-                    print(f'light calc: {e}')
+                    # print(f'light calc: {e}')
+                    pass
 
             if object_count == 0:
                 total_light += self.light_mod
@@ -279,18 +281,23 @@ class Model:
         # abort when minimum values are not reached
         if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
             return
-        # elif not self.light_minimum_reached():
-        #     return
-        # print(self.light.lightarray[self.position[0], self.position[1], self.position[2]])
 
-
+        if self.temperature/100 > 1:
+            self.water *= self.temperature/100
 
         if self.water/100 <= 1.5:
             branch_length *= self.water/100
             min_branching_height *= self.water/100
         elif self.water/100 > 1.5:
             branch_length *= 1-self.water/100
-            # leafes?
+            min_branching_height *= 1-self.water/100
+
+        if self.nutrients/100 <= 1.5:
+            branch_length *= self.nutrients/100
+            min_branching_height *= self.nutrients/100
+        elif self.nutrients/100 > 1.5:
+            branch_length *= 1-self.nutrients/100
+            min_branching_height *= 1-self.water/100
 
 
         branching_position = []
@@ -307,7 +314,7 @@ class Model:
         branching_position.append(self.position)
         branching_radius.append(self.radius)
         
-        print(f'branch radius: {self.radius}')
+        # print(f'branch radius: {self.radius}')
         for i in range(iterations):
             random.shuffle(branching_position)
             # remove random items from the list
@@ -353,7 +360,7 @@ class Model:
             branching_radius_tmp = []
 
 
-        # ---- generate leafs ---- TODO uncomment
+        # ---- generate leafs ---- code partly deprecated
         # for layer in range(0, self.width):
         #     for row in range(0, self.height):
         #         for voxel in range(0, self.width):
@@ -363,7 +370,9 @@ class Model:
         #                 self.model[layer,row,voxel] = self.id_leaf
         #                 # recalculate lightlevel
         #                 self.light.calculate()
-        print('done')
+        # print('images')
+        # self.generate_images()
+        # print('done')
 
     # ---------------- display model ----------------
     def mathplotlib_plot(self):
@@ -404,6 +413,7 @@ class Model:
         sides = ['front', 'back', 'left', 'right']
         
         # -------- image generation with leafs --------
+        add_leafs = False
         if add_leafs == True:
             for side in sides:
                 image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
