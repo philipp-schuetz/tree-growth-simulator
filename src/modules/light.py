@@ -2,7 +2,8 @@ import numpy as np
 from modules.config import config
 
 class Light:
-    def __init__(self, model):
+    """class partly deprecated"""
+    def __init__(self):
         # {0: 100, 1: 0, 2: 50, 3: 0}
         self.translucency = {}
         self.set_translucency()
@@ -12,7 +13,6 @@ class Light:
         self.height = -1
         self.set_dimensions()
 
-        self.model = model
         self.lightarray = np.zeros((self.width, self.height, self.width))
 
         self.lightlevel = -1
@@ -37,7 +37,7 @@ class Light:
         """set inital lightlevel from ui"""
         self.lightlevel = light
 
-    def calculate(self):
+    def calculate(self, model):
         """calculates the lightvalue for each voxel \n
         only one lightvalue is calculated per voxel\n
         the value calculated refers to the side most close to the models edge"""
@@ -54,7 +54,7 @@ class Light:
                             else:
                                 # calculate new light value and add it to light array
                                 light_back = self.lightarray[layer-1,row,voxel]
-                                translucency_back = self.translucency[self.model[layer-1,row,voxel]]
+                                translucency_back = self.translucency[model[layer-1,row,voxel]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
             elif side == 'back':
@@ -68,7 +68,7 @@ class Light:
                             else:
                                 # calculate new light value and add it to light array
                                 light_back = self.lightarray[layer+1,row,voxel]
-                                translucency_back = self.translucency[self.model[layer+1,row,voxel]]
+                                translucency_back = self.translucency[model[layer+1,row,voxel]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
             elif side == 'left':
@@ -81,7 +81,7 @@ class Light:
                             else:
                                 # calculate new light value and add it to light array
                                 light_back = self.lightarray[layer,row,voxel-1]
-                                translucency_back = self.translucency[self.model[layer,row,voxel-1]]
+                                translucency_back = self.translucency[model[layer,row,voxel-1]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
             elif side == 'right':
@@ -94,7 +94,7 @@ class Light:
                             else:
                                 # calculate new light value and add it to light array
                                 light_back = self.lightarray[layer,row,voxel+1]
-                                translucency_back = self.translucency[self.model[layer,row,voxel+1]]
+                                translucency_back = self.translucency[model[layer,row,voxel+1]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)
 
             elif side == 'top':
@@ -107,5 +107,5 @@ class Light:
                             else:
                                 # calculate new light value and add it to light array
                                 light_back = self.lightarray[layer,row-1,voxel]
-                                translucency_back = self.translucency[self.model[layer,row-1,voxel]]
+                                translucency_back = self.translucency[model[layer,row-1,voxel]]
                                 self.lightarray[layer,row,voxel] += light_back*(translucency_back/100)

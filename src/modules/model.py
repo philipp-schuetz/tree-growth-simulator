@@ -25,6 +25,7 @@ class Model:
         self.model = np.zeros((self.width, self.height, self.width))
 
         # modifiers
+        self.light_mod = -1
         self.water = -1
         self.temperature = -1
         self.nutrients = -1
@@ -34,6 +35,7 @@ class Model:
         self.minimum_water = -1
         self.minimum_temperature = -1
         self.minimum_nutrients = -1
+        self.set_minimum_values()
 
         # base material and radius for tree generation
         self.material = self.id_wood
@@ -42,15 +44,15 @@ class Model:
         # set first positions
         self.start_position = [int(self.width/2+0.5), self.height-1, int(self.width/2+0.5)]
         self.current_direction = 0
-        self.position = self.start_position
+        self.position = self.start_position.copy()
 
         self.saved_position = []
         self.saved_direction = []
         self.saved_radius = []
 
-        self.light = light.Light(self.model)
-        # initial light calculation
-        # self.light.calculate() TODO
+        self.radius_mode = 'trunk'
+
+        self.light = light.Light()
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
@@ -79,6 +81,7 @@ class Model:
     
     def set_modifiers(self, light:int, water:int, temperature:int, nutrients:int):
         """set modifiers from ui"""
+        self.light_mod = light
         self.water = water
         self.temperature = temperature
         self.nutrients = nutrients
@@ -102,19 +105,19 @@ class Model:
     def place_voxel(self):
         """set current voxel(s) to specified material"""
         try:
-            if self.radius > 0:
+            if self.radius > 1:
                 for layer in range(self.width):
                     for voxel in range(self.width):
                         distance = np.sqrt((layer - self.position[0])**2 + (voxel - self.position[2])**2)
                         if distance <= self.radius:
                             self.model[layer,self.position[1],voxel] = self.material
-
-            elif self.radius == 0:
+            elif self.radius == 1:
                 self.model[self.position[0],self.position[1],self.position[2]] = self.material
             else:
                 raise ValueError("radius for voxel placement can't be negative")
         except IndexError as e:
-            print(e)
+            # print(e)
+            pass
         
     def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
         """return True if voxel has given material next to it"""
@@ -145,13 +148,13 @@ class Model:
     def forward(self):
         """move one voxel in the current direction"""
         match self.current_direction:
-            case 0:# positive layer
+            case 0:# positive layer - forward
                 self.position[0] = self.position[0]+1
-            case 1: # negative voxel
+            case 1: # negative voxel - right
                 self.position[2] = self.position[2]-1
-            case 2:# negative layer
+            case 2:# negative layer - back
                 self.position[0] = self.position[0]-1
-            case 3: # positive voxel
+            case 3: # positive voxel - left
                 self.position[2] = self.position[2]+1
     
     def right(self):
@@ -178,7 +181,7 @@ class Model:
         """change radius size by the set amount"""
         radius = self.radius
         radius += amount
-        if radius >= 0:
+        if radius >= 1:
             self.radius = radius
         else:
             return
@@ -203,112 +206,161 @@ class Model:
     
     def save_radius(self):
         """save current radius"""
-        self.saved_position.append(self.radius)
+        self.saved_radius.append(self.radius)
 
     def get_radius(self):
         """get the radius last saved"""
         if len(self.saved_radius) > 0:
             self.radius = self.saved_radius.pop(-1)
+    
+    def save_positioning(self):
+        """save current position, direction and radius"""
+        self.save_position()
+        self.save_direction()
+        self.save_radius()
 
-    def generate_branches(self, branch_length, branch_radius):
-        if branch_length <= 0 or not self.is_within_bounds():
-            return
-
-        # Generate current branch
-        for i in range(branch_length):
-            self.place_voxel()
-            self.forward()
-
-        # Branch again
-        self.right()  # Turn right 90°
-        self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1, branch_radius)  # Recursive call for the new branch
-
-        # Return to the main branch
-        self.set_radius(1)  # Increase radius by one
-        self.left()  # Turn left 90°
-        for i in range(branch_length):
-            self.forward()
-
-        # Branch again on the other side
-        self.left()  # Turn left 90°
-        self.set_radius(-1)  # Reduce radius by one
-        self.generate_branches(branch_length-1, branch_radius)  # Recursive call for the new branch
-
-        # Return to the main branch
-        self.set_radius(1)  # Increase radius by one
-        self.right()  # Turn right 90°
-        for i in range(branch_length):
-            self.forward()
+    def get_positioning(self):
+        """get saved position, direction and radius"""
+        self.get_position()
+        self.get_direction()
+        self.get_radius()
 
     def is_within_bounds(self):
         """Check if the current position is within the bounds of the model"""
         x, y, z = self.position
-        model_width, model_height, model_depth = self.model.shape
-        return 0 <= x < model_width and 0 <= y < model_height and 0 <= z < model_depth
+        return 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.width
+    
+    def light_minimum_reached(self) -> bool:
+        directions = [(-1, 0, 0), (1, 0, 0), (0, 0, -1), (0, 0, 1), (0, -1, 0)]
+        # front back left right top
+        if 'front' not in self.light.activated_sides:
+            directions[0] = 0
+        if 'back' not in self.light.activated_sides:
+            directions[1] = 0
+        if 'left' not in self.light.activated_sides:
+            directions[2] = 0
+        if 'right' not in self.light.activated_sides:
+            directions[3] = 0
+        if 'top' not in self.light.activated_sides:
+            directions[4] = 0
+
+        
+        total_light = 0
+
+        for direction in directions:
+            if direction == 0:
+                continue
+            object_count = 0
+            for x in range(1, 250):
+                dx, dy, dz = direction
+                new_x, new_y, new_z = self.position[0] + dx*x, self.position[1] + dy*x, self.position[2] + dz*x
+
+                try:
+                    if self.model[new_x,new_y,new_z] != 0:
+                        object_count += 1
+                except IndexError as e:
+                    # print(f'light calc: {e}')
+                    pass
+
+            if object_count == 0:
+                total_light += self.light_mod
+        
+        if total_light/2 >= self.minimum_light:
+            return True
+        else:
+            return False
 
 
     def generate_model(self):
-        # TODO check values of all modifiers before generating
-        # all generator values must reach a specific minimum (or maximum) value to start growing
-        # reaching a specific value could add specific rules for generation or modify the iterations variable
-
-        # start_radius
-        self.radius = 0
-        trunk_height = 80
-        branch_iterations = 80
-        branch_length = 8
-        # defines how often the trunk radius gets smaller
-        radius_mod = 2
+        self.radius = 5 # start_radius
+        branch_length = 20
+        iterations = 6
+        min_branching_height = 40 # height at which branches start appearing
 
         # ---- calculate and apply modifiers ----
-        # abort when minimum values are not reached TODO uncomment
-        # if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
-        #     return
-        # elif self.light.lightarray[self.position[0], self.position[1], self.position[2]] < self.minimum_light:
-        #     return
-        
+        # abort when minimum values are not reached
+        if self.water < self.minimum_water or self.temperature < self.minimum_temperature or self.nutrients < self.minimum_nutrients:
+            return
 
-        trunk = 0
-        while trunk < trunk_height:
+        if self.temperature/100 > 1:
+            self.water *= self.temperature/100
+
+        if self.water/100 <= 1.5:
+            branch_length *= self.water/100
+            min_branching_height *= self.water/100
+        elif self.water/100 > 1.5:
+            branch_length *= 1-self.water/100
+            min_branching_height *= 1-self.water/100
+
+        if self.nutrients/100 <= 1.5:
+            branch_length *= self.nutrients/100
+            min_branching_height *= self.nutrients/100
+        elif self.nutrients/100 > 1.5:
+            branch_length *= 1-self.nutrients/100
+            min_branching_height *= 1-self.water/100
+
+
+        branching_position = []
+        branching_radius = []
+        branching_position_tmp = []
+        branching_radius_tmp = []
+        
+        # generate main trunk
+        for i in range(int(min_branching_height)):
             self.place_voxel()
             self.up()
-            if trunk % radius_mod == 0:# TODO fix error with trunk gen, TODO no "up" while branching (all in plane)
+            if i % 20 == 0:
                 self.set_radius(-1)
-                self.generate_branches(branch_length, self.radius)
-            trunk += 1
+        branching_position.append(self.position)
+        branching_radius.append(self.radius)
+        
+        # print(f'branch radius: {self.radius}')
+        for i in range(iterations):
+            random.shuffle(branching_position)
+            # remove random items from the list
+            # for x in range(int(len(branching_position)/4)):
+            #     if i == 0:
+            #         continue
+            #     branching_position.pop(random.randrange(len(branching_position)))
+            
+            for bp in range(len(branching_position)):
+                start_pos = branching_position[bp]
+                start_radius = branching_radius[bp]
+
+                for d in range(4):
+                    # chance to skip branch
+                    if random.randrange(64) == 0 and iterations < 2:
+                        continue
+                    elif random.randrange(4) == 0 and iterations >= 2 and iterations < 4:
+                        continue
+                    elif random.randrange(2) == 0 and iterations >= 4:
+                        continue
+                    
+                    self.position = start_pos.copy()
+                    self.radius = start_radius
+                    self.current_direction = d
+                    # branch_length += random.randrange(-2,i)
+                    for m in range(int(branch_length)):
+                        self.forward()
+                        if not self.light_minimum_reached():
+                            break
+                        self.place_voxel()
+                        for du in range(random.randrange(8)):
+                            self.up()
+                        for dd in range(random.randrange(4)):
+                            self.down()
+                        self.set_radius(-1)
+                    # save branch end
+                    branching_position_tmp.append(self.position)
+                    branching_radius_tmp.append(self.radius)
+
+            branching_position = branching_position_tmp.copy()
+            branching_position_tmp = []
+            branching_radius = branching_radius_tmp.copy()
+            branching_radius_tmp = []
 
 
-        # # ---- generate structure ----
-        # # trunk
-        # trunk = 0
-        # while trunk < trunk_height:
-        #     self.place_voxel()
-        #     self.up()
-        #     if trunk % radius_mod == 0:
-        #         self.set_radius(-1)
-        #     trunk += 1
-
-        # iteration = 0
-        # while iteration < branch_iterations:
-        #     self.save_position()
-        #     self.save_direction()
-        #     self.save_radius()
-
-        #     self.forward()
-        #     self.place_voxel()
-        #     self.up()
-        #     self.forward()
-        #     self.place_voxel()
-        #     self.up()
-
-        #     if self.radius > 0:
-        #         self.set_radius(-1)
-
-        #     iteration += 1
-
-
-        # ---- generate leafs ---- TODO uncomment
+        # ---- generate leafs ---- code partly deprecated
         # for layer in range(0, self.width):
         #     for row in range(0, self.height):
         #         for voxel in range(0, self.width):
@@ -318,7 +370,9 @@ class Model:
         #                 self.model[layer,row,voxel] = self.id_leaf
         #                 # recalculate lightlevel
         #                 self.light.calculate()
-        print('done')
+        # print('images')
+        # self.generate_images()
+        # print('done')
 
     # ---------------- display model ----------------
     def mathplotlib_plot(self):
@@ -359,6 +413,7 @@ class Model:
         sides = ['front', 'back', 'left', 'right']
         
         # -------- image generation with leafs --------
+        add_leafs = False
         if add_leafs == True:
             for side in sides:
                 image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
