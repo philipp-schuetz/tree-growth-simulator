@@ -329,9 +329,9 @@ class Model:
 
                 for d in range(4):
                     # chance to skip branch
-                    if random.randrange(64) == 0 and iterations < 2:
+                    if random.randrange(128) == 0 and iterations < 2:
                         continue
-                    elif random.randrange(4) == 0 and iterations >= 2 and iterations < 4:
+                    elif random.randrange(6) == 0 and iterations >= 2 and iterations < 4:
                         continue
                     elif random.randrange(2) == 0 and iterations >= 4:
                         continue
