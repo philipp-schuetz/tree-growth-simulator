@@ -1,7 +1,6 @@
 """Module contains the App class."""
-import modules.ui as ui
-import modules.model as model
-import modules.config as config
+from modules import ui
+from modules import model
 
 class App:
     """App contains ui, model and light objects and the mainloop of this application"""
@@ -23,5 +22,4 @@ class App:
                     self.model.set_light_sides(self.ui.get_light_sides())
                     self.model.generate_model()
                 case 'show':
-                    # self.model.generate_images()
                     self.model.mathplotlib_plot()
