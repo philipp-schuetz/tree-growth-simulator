@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 class Config():
+    """Config holds default contents for config.json and methods to apply the config"""
     def __init__(self) -> None:
         # path to config file
         self.path = Path('config.json')
@@ -25,7 +26,7 @@ class Config():
                 "width": 249,
                 "height": 498
             },
-            "image_generation": {
+            "visualisation": {
                 "add_leafs": True
             },
             "light": {
@@ -72,7 +73,7 @@ class Config():
         for value in self.config['material_id'].values():
             if not isinstance(value, int):
                 raise ValueError('material id must be an integer')
-            elif value < 0:
+            if value < 0:
                 raise ValueError('material id must be greater than 0')
         return self.config['material_id']
 
@@ -83,7 +84,7 @@ class Config():
         for value in self.config['material_translucency'].values():
             if not isinstance(value, int):
                 raise ValueError('material translucency value must be an integer')
-            elif value < 0 or value > 100:
+            if value < 0 or value > 100:
                 raise ValueError('material translucency value must be between 0 and 100')
 
         return self.config['material_translucency']
@@ -97,12 +98,11 @@ class Config():
         # data validation
         if not isinstance(width, int) or not isinstance(height, int):
             raise ValueError('model width and height must be an integer')
-        elif width*2 != height:
+        if width*2 != height:
             raise ValueError('model width and height must have a 1:2 ratio')
-        elif width <= 0 or height <= 0:
+        if width <= 0 or height <= 0:
             raise ValueError('model width and height must be greater than 0')
-        else:
-            return self.config['model_dimensions']
+        return self.config['model_dimensions']
 
     def get_minimum_values(self) -> list[int]:
         """return the minimum values of all modifiers for the tree to grow"""
@@ -118,15 +118,15 @@ class Config():
             # data validation
             if not isinstance(minimum, int):
                 raise ValueError('minimum values need to be an integer')
-            elif minimum <= 0:
+            if minimum <= 0:
                 raise ValueError('minimum values need to be be positive')
-        
+
         return minimum_values
-    
+
     def get_add_leafs(self) -> bool:
-        """return True if image generation should use leafs, else return False"""
+        """return True if model should use leafs, else return False"""
         self.load()
-        boolean = self.config['image_generation']['add_leafs']
+        boolean = self.config['visualisation']['add_leafs']
 
         # data validation
         if not isinstance(boolean, bool):

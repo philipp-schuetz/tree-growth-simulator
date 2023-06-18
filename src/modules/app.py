@@ -1,6 +1,6 @@
 """Module contains the App class."""
-import modules.ui as ui
-import modules.model as model
+from modules import ui
+from modules import model
 
 class App:
     """App contains ui, model and light objects and the mainloop of this application"""
