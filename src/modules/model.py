@@ -1,6 +1,5 @@
 import numpy as np
 from modules.config import config
-import modules.light as light
 from pathlib import Path
 import random
 import matplotlib.pyplot as plt
@@ -50,7 +49,7 @@ class Model:
 
         self.radius_mode = 'trunk'
 
-        self.light = light.Light()
+        self.activated_sides = ['front','back','left','right','top']
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
@@ -63,13 +62,13 @@ class Model:
 
     def set_light_sides(self, sides: list[bool]):
         """format of sides: [front, back, left, right, top]"""
-        self.light.activated_sides = ['front','back','left','right','top']
+        self.activated_sides = ['front','back','left','right','top']
         to_remove = []
         for i in range(0, len(sides)):
             if not sides[i]:
-                to_remove.append(self.light.activated_sides[i])
+                to_remove.append(self.activated_sides[i])
         for item in to_remove:
-            self.light.activated_sides.remove(item)
+            self.activated_sides.remove(item)
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
@@ -84,21 +83,12 @@ class Model:
         self.temperature = temperature
         self.nutrients = nutrients
 
-        self.light.set_light(light)
-
     def save(self):
         """save model in file"""
         np.save('../saves/lightarr.npy', self.model)
 
-    def load(self):
-        """load lightarray from file"""
-        self.model = np.load('../saves/lightarr.npy')
-
 
     # ---------------- l-system ----------------
-
-    # cut the forward move length in half every time
-
 
     def place_voxel(self):
         """set current voxel(s) to specified material"""
@@ -231,15 +221,15 @@ class Model:
     def light_minimum_reached(self) -> bool:
         directions = [(-1, 0, 0), (1, 0, 0), (0, 0, -1), (0, 0, 1), (0, -1, 0)]
         # front back left right top
-        if 'front' not in self.light.activated_sides:
+        if 'front' not in self.activated_sides:
             directions[0] = 0
-        if 'back' not in self.light.activated_sides:
+        if 'back' not in self.activated_sides:
             directions[1] = 0
-        if 'left' not in self.light.activated_sides:
+        if 'left' not in self.activated_sides:
             directions[2] = 0
-        if 'right' not in self.light.activated_sides:
+        if 'right' not in self.activated_sides:
             directions[3] = 0
-        if 'top' not in self.light.activated_sides:
+        if 'top' not in self.activated_sides:
             directions[4] = 0
 
         
