@@ -15,11 +15,6 @@ class Config():
                 "leaf": 2,
                 "wall": 3
             },
-            "material_color": {
-                "wood": [139, 69, 19],
-                "leaf": [0, 128, 0],
-                "wall": [0, 0, 0]
-            },
             "material_translucency": {
                 "air": 100,
                 "wood": 0,
@@ -80,18 +75,6 @@ class Config():
             elif value < 0:
                 raise ValueError('material id must be greater than 0')
         return self.config['material_id']
-
-    def get_material_color(self) -> dict[str, list[int]]:
-        """return the material colors from the config"""
-        self.load()
-            # data validation
-        for value in self.config['material_color'].values():
-            if len(value) < 3 or len(value) > 3:
-                raise ValueError('material color must be rgb values (r,g,b)')
-            for color_value in value:
-                if color_value < 0 or color_value > 255:
-                    raise ValueError('material color must be rgb values (0<=rgb<=255)')
-        return self.config['material_color']
 
     def get_material_translucency(self) -> dict[str, int]:
         """return the material translucency in percent from the config"""
