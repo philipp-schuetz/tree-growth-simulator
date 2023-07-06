@@ -51,6 +51,8 @@ class Model:
 
         self.activated_sides = ['front','back','left','right','top']
 
+        self.leaf_generation = False
+
     def set_minimum_values(self):
         """set minimum values for modifiers"""
         minimum_values = config.get_minimum_values()
@@ -69,6 +71,10 @@ class Model:
                 to_remove.append(self.activated_sides[i])
         for item in to_remove:
             self.activated_sides.remove(item)
+    
+    def set_leaf_generation(self, status:bool):
+        """set whether leaf generation is enabled"""
+        self.leaf_generation = status
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'

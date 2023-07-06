@@ -18,7 +18,7 @@ class Ui:
 
         # define ui layout
         self.layout = [
-            [sg.Frame(title='Modifiers in %', layout=[
+            [sg.Frame(title='Model Settings', layout=[
                 [
                     sg.Text('Light'),
                     sg.Slider(range=(0,200), default_value=100, key='light', orientation='horizontal')
@@ -41,6 +41,10 @@ class Ui:
                 [
                     sg.Text('Nutrients'),
                     sg.Slider(range=(0,200), default_value=100, key='nutrients', orientation='horizontal')
+                ],
+                [
+                    sg.Text('Leaf Generation'),
+                    sg.Checkbox('enable', default=False, key='leaf-generation')
                 ]
             ]), sg.Frame(title='Buttons', layout=[
                 [sg.Button('Start')],
@@ -64,6 +68,7 @@ class Ui:
                 self.value_water = values['water']
                 self.value_temperature = values['temperature']
                 self.value_nutrients = values['nutrients']
+                self.value_leaf_generation = values['leaf-generation']
 
                 self.values_light_sides = [
                     values['front'],
@@ -102,3 +107,7 @@ class Ui:
     def get_nutrients(self) -> int:
         """get the nutrients value"""
         return self.value_nutrients
+    
+    def get_leaf_generation(self) -> bool:
+        """get whether leaf generation is enabled"""
+        return self.value_leaf_generation
