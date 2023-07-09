@@ -20,6 +20,7 @@ class App:
                         self.ui.get_nutrients()
                     )
                     self.model.set_light_sides(self.ui.get_light_sides())
+                    self.model.set_leaf_generation(self.ui.get_leaf_generation())
                     self.model.generate_model()
                 case 'show':
                     self.model.mathplotlib_plot()

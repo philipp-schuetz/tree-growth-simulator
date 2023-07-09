@@ -51,6 +51,8 @@ class Model:
 
         self.activated_sides = ['front','back','left','right','top']
 
+        self.leaf_generation = False
+
     def set_minimum_values(self):
         """set minimum values for modifiers"""
         minimum_values = config.get_minimum_values()
@@ -69,6 +71,10 @@ class Model:
                 to_remove.append(self.activated_sides[i])
         for item in to_remove:
             self.activated_sides.remove(item)
+    
+    def set_leaf_generation(self, status:bool):
+        """set whether leaf generation is enabled"""
+        self.leaf_generation = status
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
@@ -108,8 +114,9 @@ class Model:
         except IndexError:
             pass
 
-    def is_next_to(self, coordinates:tuple[int,int,int], material_id:int) -> bool:
+    def is_next_to(self, material_id:int) -> bool: # TODO check if method is working properly
         """return True if voxel has given material next to it"""
+        coordinates = self.position
         out = False
         try:
             # back
@@ -221,7 +228,7 @@ class Model:
         return 0 <= x < self.width and 0 <= y < self.height and 0 <= z < self.width
 
     def light_minimum_reached(self) -> bool:
-        """calculate and check if light level is above minimum"""
+        """calculate and check if light level is above minimum on current position"""
         directions = [(-1, 0, 0), (1, 0, 0), (0, 0, -1), (0, 0, 1), (0, -1, 0)]
         # front back left right top
         if 'front' not in self.activated_sides:
@@ -345,45 +352,56 @@ class Model:
             branching_radius = branching_radius_tmp.copy()
             branching_radius_tmp = []
 
-
-        # ---- generate leafs ---- code partly deprecated
-        # for layer in range(0, self.width):
-        #     for row in range(0, self.height):
-        #         for voxel in range(0, self.width):
-        #             # check if voxel is next to wood and minimum lightlevel is reached
-        #             if self.is_next_to((layer,row,voxel),self.id_wood) and self.light.lightarray[layer,row,voxel] >= self.minimum_light:
-        #                 # add leaf
-        #                 self.model[layer,row,voxel] = self.id_leaf
-        #                 # recalculate lightlevel
-        #                 self.light.calculate()
-        # print('images')
-        # self.generate_images()
-        # print('done')
+        if self.leaf_generation:
+            print('generating leaves')
+            # ---- generate leaves ---- # check thickness of wood
+            for layer in range(0, self.width):
+                for row in range(0, int(self.height-min_branching_height)): # start leaf generation on branching height
+                    for voxel in range(0, self.width):
+                        # check if voxel is next to wood and minimum lightlevel is reached
+                        self.position = [layer,row,voxel]
+                        if self.is_next_to(self.id_wood) and self.light_minimum_reached():
+                            # add leaf
+                            self.model[layer,row,voxel] = self.id_leaf
+        print('done')
 
     # ---------------- display model ----------------
     def mathplotlib_plot(self):
         """generate a 3d plot to visualize the tree model"""
-        # Plot the resulting tree model
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
 
-        # Get the coordinates of the wood voxels
-        x, y, z = np.where(self.model == self.id_wood)
-        x1, y1, z1 = np.where(self.model == self.id_leaf)
+        if not self.leaf_generation:
+            x = 1
+        else:
+            x = 2
 
-        # plot voxels with correct orientation
-        ax.scatter(x, z, -y, c='brown', marker='s')
-        ax.scatter(x1, z1, -y1, c='green', marker='s')
+        for i in range(x):
+            # Plot the resulting tree model
+            fig = plt.figure(num=int(i+1))
+            if i == 0:
+                fig.suptitle('Tree Structure')
+            else:
+                fig.suptitle('Tree Structure + Leaves')
+            ax = fig.add_subplot(111, projection='3d')
 
-        # Set the limits for the axes
-        ax.set_xlim(0, self.model.shape[0])
-        ax.set_ylim(0, self.model.shape[2])
-        ax.set_zlim(-self.model.shape[1], 0)
+            # Get the coordinates of the wood voxels
+            x, y, z = np.where(self.model == self.id_wood)
+            if i == 1:
+                x1, y1, z1 = np.where(self.model == self.id_leaf)
 
-        # Set labels for the axes
-        ax.set_xlabel('X')
-        ax.set_ylabel('Z')
-        ax.set_zlabel('Y')
+            # plot voxels with correct orientation
+            ax.scatter(x, z, -y, c=((105,75,55)), marker='s')
+            if i == 1:
+                ax.scatter(x1, z1, -y1, c=((95,146,106)), marker='s')
 
-        # Show the plot
+            # Set the limits for the axes
+            ax.set_xlim(0, self.model.shape[0])
+            ax.set_ylim(0, self.model.shape[2])
+            ax.set_zlim(-self.model.shape[1], 0)
+
+            # Set labels for the axes
+            ax.set_xlabel('X')
+            ax.set_ylabel('Z')
+            ax.set_zlabel('Y')
+
+        # Show the plot(s)
         plt.show()
