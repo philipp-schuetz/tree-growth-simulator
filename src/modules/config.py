@@ -41,6 +41,7 @@ class Config():
             "nutrients": {
                 "minimum": 20
             },
+            "logging": True
         }
 
         # holds config loaded from file
@@ -132,5 +133,16 @@ class Config():
         if not isinstance(boolean, bool):
             raise ValueError('add_leafes value must be a boolean')
         return boolean
+    
+    def get_logging_enabled(self) -> bool:
+        """return True if logging is enabled in config, else return False"""
+        self.load()
+        boolean = self.config['logging']
+
+        # data validation
+        if not isinstance(boolean, bool):
+            raise ValueError('logging value must be a boolean')
+        return boolean
+
 
 config = Config()
