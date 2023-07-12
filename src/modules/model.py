@@ -54,8 +54,6 @@ class Model:
 
         self.leaf_generation = False
 
-        if config.get_logging_enabled():
-            logging.basicConfig(filename='logfile.log', level=logging.INFO, encoding='utf-8')
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
