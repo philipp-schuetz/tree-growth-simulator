@@ -1,4 +1,5 @@
 import random
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from modules.config import config
@@ -52,6 +53,10 @@ class Model:
         self.activated_sides = ['front','back','left','right','top']
 
         self.leaf_generation = False
+
+        # increases after model has finished generating to prevent generation of multiple models in one array
+        self.model_generated += 0
+
 
     def set_minimum_values(self):
         """set minimum values for modifiers"""
@@ -268,6 +273,10 @@ class Model:
 
     def generate_model(self):
         """main method for tree structure generation"""
+        # reset contents of model when generation without restarting the app
+        if self.model_generated > 0:
+            self.model = np.zeros((self.width, self.height, self.width))
+        logging.info('starting model generation')
         self.radius = 5 # start_radius
         branch_length = 20
         iterations = 6
@@ -353,7 +362,7 @@ class Model:
             branching_radius_tmp = []
 
         if self.leaf_generation:
-            print('generating leaves')
+            logging.info('starting leaf generation')
             # ---- generate leaves ---- # check thickness of wood
             for layer in range(0, self.width):
                 for row in range(0, int(self.height-min_branching_height)): # start leaf generation on branching height
@@ -363,7 +372,9 @@ class Model:
                         if self.is_next_to(self.id_wood) and self.light_minimum_reached():
                             # add leaf
                             self.model[layer,row,voxel] = self.id_leaf
-        print('done')
+        
+        self.model_generated += 1
+        logging.info('model generation has finished')
 
     # ---------------- display model ----------------
     def mathplotlib_plot(self):

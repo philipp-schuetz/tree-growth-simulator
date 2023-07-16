@@ -1,10 +1,12 @@
 """Module contains the App class."""
 from modules import ui
 from modules import model
+import logging
 
 class App:
     """App contains ui, model and light objects and the mainloop of this application"""
     def __init__(self):
+        logging.basicConfig(filename='logfile.log', level=logging.INFO, encoding='utf-8')
         self.ui = ui.Ui()
         self.model = model.Model()
 

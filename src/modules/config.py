@@ -1,6 +1,7 @@
 """holds the default configuration and methods to interact with the config file"""
 import json
 from pathlib import Path
+import logging
 
 class Config():
     """Config holds default contents for config.json and methods to apply the config"""
@@ -55,6 +56,7 @@ class Config():
         if not self.path.is_file():
             with open(self.path, 'w', encoding='UTF-8') as file:
                 json.dump(self.base, file)
+        logging.info('created config file')
 
     def load(self):
         """load config dictionary from file"""
@@ -73,8 +75,10 @@ class Config():
         # data validation
         for value in self.config['material_id'].values():
             if not isinstance(value, int):
+                logging.error('config: material id must be an integer')
                 raise ValueError('material id must be an integer')
             if value < 0:
+                logging.error('config: material id must be greater than 0')
                 raise ValueError('material id must be greater than 0')
         return self.config['material_id']
 
@@ -84,8 +88,10 @@ class Config():
         # data validation
         for value in self.config['material_translucency'].values():
             if not isinstance(value, int):
+                logging.error('config: material translucency value must be an integer')
                 raise ValueError('material translucency value must be an integer')
             if value < 0 or value > 100:
+                logging.error('config: material translucency value must be between 0 and 100')
                 raise ValueError('material translucency value must be between 0 and 100')
 
         return self.config['material_translucency']
@@ -98,10 +104,13 @@ class Config():
         height = self.config['model_dimensions']['height']
         # data validation
         if not isinstance(width, int) or not isinstance(height, int):
+            logging.error('config: model width and height must be an integer')
             raise ValueError('model width and height must be an integer')
         if width*2 != height:
+            logging.error('config: model width and height must have a 1:2 ratio')
             raise ValueError('model width and height must have a 1:2 ratio')
         if width <= 0 or height <= 0:
+            logging.error('config: model width and height must be greater than 0')
             raise ValueError('model width and height must be greater than 0')
         return self.config['model_dimensions']
 
@@ -118,8 +127,10 @@ class Config():
         for minimum in minimum_values:
             # data validation
             if not isinstance(minimum, int):
+                logging.error('config: minimum values need to be an integer')
                 raise ValueError('minimum values need to be an integer')
             if minimum <= 0:
+                logging.error('config: minimum values need to be be positive')
                 raise ValueError('minimum values need to be be positive')
 
         return minimum_values
@@ -131,6 +142,7 @@ class Config():
 
         # data validation
         if not isinstance(boolean, bool):
+            logging.error('config: add_leafes value must be a boolean')
             raise ValueError('add_leafes value must be a boolean')
         return boolean
     
@@ -141,6 +153,7 @@ class Config():
 
         # data validation
         if not isinstance(boolean, bool):
+            logging.error('config: logging value must be a boolean')
             raise ValueError('logging value must be a boolean')
         return boolean
 
