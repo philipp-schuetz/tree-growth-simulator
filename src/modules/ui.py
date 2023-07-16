@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+import logging
 class Ui:
     """Ui class holds all ui elements"""
     def __init__(self) -> None:
@@ -63,6 +64,7 @@ class Ui:
         # check for events
         match event:
             case 'Start':
+                logging.info('triggered "start" event in ui')
                 # save values
                 self.value_light = values['light']
                 self.value_water = values['water']
@@ -79,8 +81,10 @@ class Ui:
                 ]
                 return 'start'
             case 'Show':
+                logging.info('triggered "show" event in ui')
                 return 'show'
             case sg.WIN_CLOSED:
+                logging.info('closed ui window')
                 self.close_window()
 
     def close_window(self) -> None:
