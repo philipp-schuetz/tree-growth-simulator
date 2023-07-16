@@ -10,10 +10,14 @@ Run:
 
 ## Graphical User Interface
 - set intensity of environmental factors
+- enable/disable generation of leaves
 - start the simulation
 - show the result
 
 ![ui screenshot](images/ui.png)
+
+## Logging
+- certain events are logged in 'logfile.log'
 
 ## Results
 ### Default Settings
