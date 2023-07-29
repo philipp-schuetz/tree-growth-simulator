@@ -6,7 +6,14 @@ from modules.app import App
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse, FileResponse
 
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 def create_id():
 	timestamp = int(time.time() * 1000)
@@ -23,6 +30,7 @@ async def redirect_typer():
     return RedirectResponse('https://github.com/philipp-schuetz/tree-growth-simulator')
 
 @app.put('/generate')
+@limiter.limit('2/minute')
 async def update_item(mod_light: int, mod_water:int, mod_temperature:int, mod_nutrients:int, light_sides_front:bool, light_sides_back:bool, light_sides_left:bool, light_sides_right:bool, light_sides_top:bool,leafes:bool):
 	id = create_id()
 	light_sides = [light_sides_front, light_sides_back, light_sides_left, light_sides_right, light_sides_top]
