@@ -36,5 +36,5 @@ async def update_item(mod_light: int, mod_water:int, mod_temperature:int, mod_nu
 	light_sides = [light_sides_front, light_sides_back, light_sides_left, light_sides_right, light_sides_top]
 	App().api_run(id, mod_light, mod_water, mod_temperature, mod_nutrients, leafes, light_sides)
 
-	# script that deletes generated files after 5 minutes (cron)
+	# TODO delete file after it was returned
 	return FileResponse(f'folder/{id}')

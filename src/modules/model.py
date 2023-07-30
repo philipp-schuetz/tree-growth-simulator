@@ -421,5 +421,7 @@ class Model:
 			ax.set_ylabel('Z')
 			ax.set_zlabel('Y')
 
+		if save:
+			plt.savefig(f'{filename}.png')
 		# Show the plot(s)
 		plt.show()
