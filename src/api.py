@@ -27,7 +27,7 @@ async def read_root():
 
 @app.get('/github')
 async def redirect_typer():
-    return RedirectResponse('https://github.com/philipp-schuetz/tree-growth-simulator')
+	return RedirectResponse('https://github.com/philipp-schuetz/tree-growth-simulator')
 
 @app.put('/generate')
 @limiter.limit('2/minute')
