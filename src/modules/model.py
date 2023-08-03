@@ -55,7 +55,7 @@ class Model:
 		self.leaf_generation = False
 
 		# increases after model has finished generating to prevent generation of multiple models in one array
-		self.model_generated += 0
+		self.model_generated = 0
 
 		self.api_id = ''
 
@@ -386,6 +386,7 @@ class Model:
 	def mathplotlib_plot(self, save:bool = False, filename:str = 'out'):
 		"""generate a 3d plot to visualize the tree model"""
 		# TODO add option to save diagram to file, after api make option also available to local users
+		# TODO get the material colors from config
 
 		if not self.leaf_generation:
 			x = 1
@@ -407,9 +408,9 @@ class Model:
 				x1, y1, z1 = np.where(self.model == self.id_leaf)
 
 			# plot voxels with correct orientation
-			ax.scatter(x, z, -y, c=((105,75,55)), marker='s')
+			ax.scatter(x, z, -y, color='brown', marker='s')
 			if i == 1:
-				ax.scatter(x1, z1, -y1, c=((95,146,106)), marker='s')
+				ax.scatter(x1, z1, -y1, color='green', marker='s')
 
 			# Set the limits for the axes
 			ax.set_xlim(0, self.model.shape[0])
