@@ -27,11 +27,11 @@ class App:
 				case 'show':
 					self.model.mathplotlib_plot()
 
-	def api_run(self, id:str, light:int, water:int, temperature:int, nutrients:int, leafes:bool, light_sides:list[bool]):
+	def api_run(self, request_id:str, light:int, water:int, temperature:int, nutrients:int, leafes:bool, light_sides:list[bool]):
 		"""run main event loop for execution through api"""
 		self.model.set_modifiers(light, water, temperature, nutrients)
 		self.model.set_api_id(id)
 		self.model.set_light_sides(light_sides)
 		self.model.set_leaf_generation(leafes)
 		self.model.generate_model()
-		self.model.mathplotlib_plot(True, id)# save model with id as name
+		self.model.mathplotlib_plot(True, request_id, True)

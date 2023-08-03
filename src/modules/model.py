@@ -1,5 +1,7 @@
 import random
 import logging
+from pathlib import Path
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from modules.config import config
@@ -383,10 +385,14 @@ class Model:
 		logging.info('model generation has finished')
 
 	# ---------------- display model ----------------
-	def mathplotlib_plot(self, save:bool = False, filename:str = 'out'):
+	def mathplotlib_plot(self, save:bool = False, filename:str = 'out', api:bool = False):
 		"""generate a 3d plot to visualize the tree model"""
-		# TODO add option to save diagram to file, after api make option also available to local users
-		# TODO get the material colors from config
+		# TODO make option available through local ui
+		# TODO get the material colors from config, add filename/path in config
+
+		# create output directory if it doesnt exist
+		if save and not os.path.exists('plots'):
+			os.makedirs('plots')
 
 		if not self.leaf_generation:
 			x = 1
@@ -422,7 +428,8 @@ class Model:
 			ax.set_ylabel('Z')
 			ax.set_zlabel('Y')
 
-		if save:
-			plt.savefig(f'{filename}.png')
-		# Show the plot(s)
-		plt.show()
+			if save:
+				file_path = Path(f'plots/{filename}_{i+1}.png')
+				plt.savefig(file_path)
+		if not api:
+			plt.show()
