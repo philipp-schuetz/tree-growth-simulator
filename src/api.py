@@ -2,9 +2,12 @@
 
 import random
 import time
+from pathlib import Path
+from zipfile import ZipFile
+from io import BytesIO
 
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 
 from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -52,5 +55,23 @@ async def generate_model(
 		request_id, mod_light, mod_water, mod_temperature, mod_nutrients, leafes, light_sides
 		)
 
-	# TODO delete file after it was returned
-	return FileResponse(f'folder/{id}')
+	zip_name = f'{request_id}.zip'
+
+	file_path_1 = Path(f'plots/{request_id}_1.png')
+	if leafes:
+		file_path_2 = Path(f'plots/{request_id}_2.png')
+
+	buffer = BytesIO()
+	with ZipFile(buffer, "w") as zipf:
+		zipf.write(file_path_1, f'{request_id}_1.png')
+		if leafes:
+			zipf.write(file_path_2, f'{request_id}_2.png')
+
+	file_path_1.unlink()
+	if leafes:
+		file_path_2.unlink()
+
+	response = StreamingResponse(iter([buffer.getvalue()]), media_type="application/x-zip-compressed")
+	response.headers["Content-Disposition"] = f'attachment; filename={zip_name}'
+
+	return response
