@@ -2,3 +2,6 @@
 .vscode
 *.pdf
 config.json
+plots
+.venv
+__pycache__
