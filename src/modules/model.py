@@ -21,6 +21,10 @@ class Model:
 		self.id_wood = ids['wood']
 		self.id_wall = ids['wall']
 
+		colors = config.get_material_colors()
+		self.color_leaf = colors['leaf']
+		self.color_wood = colors['wood']
+
 		# create array for tree model
 		self.model = np.zeros((self.width, self.height, self.width))
 
@@ -388,7 +392,7 @@ class Model:
 	def mathplotlib_plot(self, save:bool = False, filename:str = 'out', api:bool = False):
 		"""generate a 3d plot to visualize the tree model"""
 		# TODO make option available through local ui
-		# TODO get the material colors from config, add filename/path in config
+		# TODO add filename/path in config
 
 		# create output directory if it doesnt exist
 		if save and not os.path.exists('plots'):
@@ -414,9 +418,9 @@ class Model:
 				x1, y1, z1 = np.where(self.model == self.id_leaf)
 
 			# plot voxels with correct orientation
-			ax.scatter(x, z, -y, color='brown', marker='s')
+			ax.scatter(x, z, -y, color=self.color_wood, marker='s')
 			if i == 1:
-				ax.scatter(x1, z1, -y1, color='green', marker='s')
+				ax.scatter(x1, z1, -y1, color=self.color_leaf, marker='s')
 
 			# Set the limits for the axes
 			ax.set_xlim(0, self.model.shape[0])

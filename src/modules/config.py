@@ -30,6 +30,10 @@ class Config():
 			"visualisation": {
 				"add_leafs": True
 			},
+			"material_colors": {
+				"leaf": "green",
+				"wood": "brown"
+			},
 			"light": {
 				"minimum": 20
 			},
@@ -157,5 +161,14 @@ class Config():
 			raise ValueError('logging value must be a boolean')
 		return boolean
 
+	def get_material_colors(self) ->  dict[str, str]:
+		"""return the material colors from the config"""
+		self.load()
+		# data validation
+		for value in self.config['material_colors'].values():
+			if not isinstance(value, str):
+				logging.error('config: material color must be a string')
+				raise ValueError('material color must be a string')
+		return self.config['material_id']
 
 config = Config()
