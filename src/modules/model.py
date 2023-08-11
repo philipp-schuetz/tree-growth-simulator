@@ -391,8 +391,9 @@ class Model:
 	# ---------------- display model ----------------
 	def mathplotlib_plot(self, save:bool = False, filename:str = 'out', api:bool = False):
 		"""generate a 3d plot to visualize the tree model"""
-		# TODO make option available through local ui
-		# TODO add filename/path in config
+		# TODO make save option available through local ui
+		if filename == 'out':
+			filename = config.get_plot_filename()
 
 		# create output directory if it doesnt exist
 		if save and not os.path.exists('plots'):
