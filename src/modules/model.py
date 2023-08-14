@@ -290,9 +290,11 @@ class Model:
 
 	def generate_model(self):
 		"""main method for tree structure generation"""
-		# reset contents of model when generation without restarting the app
+		# reset model and positioning when generation without restarting the app
 		if self.model_generated > 0:
 			self.model = np.zeros((self.width, self.height, self.width))
+			self.current_direction = 0
+			self.position = self.start_position.copy()
 		logging.info('starting model generation')
 		self.radius = 5 # start_radius
 		branch_length = 20
