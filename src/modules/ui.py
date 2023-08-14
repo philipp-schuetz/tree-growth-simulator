@@ -45,7 +45,11 @@ class Ui:
 				],
 				[
 					sg.Text('Leaf Generation'),
-					sg.Checkbox('enable', default=False, key='leaf-generation')
+					sg.Checkbox('', default=False, key='leaf-generation')
+				],
+								[
+					sg.Text('Save to Image'),
+					sg.Checkbox('', default=False, key='save-to-image')
 				]
 			]), sg.Frame(title='Buttons', layout=[
 				[sg.Button('Start')],
@@ -71,6 +75,7 @@ class Ui:
 				self.value_temperature = values['temperature']
 				self.value_nutrients = values['nutrients']
 				self.value_leaf_generation = values['leaf-generation']
+				self.value_save_to_image = values['save-to-image']
 
 				self.values_light_sides = [
 					values['front'],
@@ -115,3 +120,7 @@ class Ui:
 	def get_leaf_generation(self) -> bool:
 		"""get whether leaf generation is enabled"""
 		return self.value_leaf_generation
+
+	def get_save_to_image(self) -> bool:
+		"""get whether saving to image is enabled"""
+		return self.value_save_to_image

@@ -59,6 +59,7 @@ class Model:
 		self.activated_sides = ['front','back','left','right','top']
 
 		self.leaf_generation = False
+		self.save_to_image = False
 
 		# increases after model has finished generating to prevent generation of multiple models in one array
 		self.model_generated = 0
@@ -88,6 +89,10 @@ class Model:
 	def set_leaf_generation(self, status:bool):
 		"""set whether leaf generation is enabled"""
 		self.leaf_generation = status
+
+	def set_save_to_image(self, status:bool):
+		"""set whether save to image is enabled"""
+		self.save_to_image = status
 
 	def set_dimensions(self):
 		'fetch and set model dimensions from config file'
@@ -391,13 +396,13 @@ class Model:
 	# ---------------- display model ----------------
 	def mathplotlib_plot(self, save:bool = False, filename:str = 'out', api:bool = False):
 		"""generate a 3d plot to visualize the tree model"""
-		# TODO make save option available through local ui
-		if filename == 'out':
-			filename = config.get_plot_filename()
 
-		# create output directory if it doesnt exist
-		if save and not os.path.exists('plots'):
-			os.makedirs('plots')
+		if self.save_to_image or save:
+			if filename == 'out':
+				filename = config.get_plot_filename()
+			# create output directory if it doesnt exist
+			if not os.path.exists('plots'):
+				os.makedirs('plots')
 
 		if not self.leaf_generation:
 			x = 1
@@ -433,7 +438,7 @@ class Model:
 			ax.set_ylabel('Z')
 			ax.set_zlabel('Y')
 
-			if save:
+			if save or self.save_to_image:
 				file_path = Path(f'plots/{filename}_{i+1}.png')
 				plt.savefig(file_path)
 		if not api:

@@ -23,6 +23,7 @@ class App:
 					)
 					self.model.set_light_sides(self.ui.get_light_sides())
 					self.model.set_leaf_generation(self.ui.get_leaf_generation())
+					self.model.set_save_to_image(self.ui.get_save_to_image())
 					self.model.generate_model()
 				case 'show':
 					self.model.mathplotlib_plot()
