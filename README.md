@@ -2,6 +2,10 @@
 Generate a 3d tree model which is made based of off different environmental factors.
 
 ## Usage
+### Executable
+Just download the executable for your system from the latest release.
+
+### Python (Version 3.11 is recommended)
 Setup:
 - git clone -b stable https://github.com/philipp-schuetz/tree-growth-simulator
 - pip install -r requirements.txt
@@ -12,6 +16,7 @@ Run:
 ## Graphical User Interface
 - set intensity of environmental factors
 - enable/disable generation of leaves
+- enable/disable image creation of result
 - start the simulation
 - show the result
 
