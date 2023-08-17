@@ -1,0 +1,46 @@
+name: Build Packages
+
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: [windows, macos, linux]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Install default dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install api dependencies
+        run: pip install -r requirements_api.txt
+
+      - name: Build Package
+        run: |
+          pyinstaller src/main.py --name tgs --onefile --clean --noconsole
+
+      - name: Archive Package
+        run: |
+          zip -r "tgs_${{ matrix.platform }}.zip" ./dist/tgs`
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: tgs_${{ matrix.platform }}
+          path: "./tgs_${{ matrix.platform }}.zip"
