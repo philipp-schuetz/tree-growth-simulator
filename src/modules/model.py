@@ -113,6 +113,10 @@ class Model:
         """set the api call id"""
         self.api_id = id
 
+    def set_random_seed(self, seed:int|bool):
+        """set the seed for random numbers from the api"""
+        self.random_seed = seed
+
     def save(self):
         """save model in file"""
         np.save('../saves/lightarr.npy', self.model)
