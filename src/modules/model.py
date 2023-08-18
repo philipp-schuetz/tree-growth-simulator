@@ -25,6 +25,8 @@ class Model:
         self.color_leaf = colors['leaf']
         self.color_wood = colors['wood']
 
+        self.random_seed = config.get_random_seed()
+
         # create array for tree model
         self.model = np.zeros((self.width, self.height, self.width))
 
@@ -341,6 +343,13 @@ class Model:
                 self.set_radius(-1)
         branching_position.append(self.position)
         branching_radius.append(self.radius)
+
+        # set random seed
+        if isinstance(self.random_seed, bool):
+            random.seed()
+        elif isinstance(self.random_seed, int):
+            random.seed(self.random_seed)
+            print(self.random_seed)
 
         for i in range(iterations):
             random.shuffle(branching_position)
