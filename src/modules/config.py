@@ -47,7 +47,8 @@ class Config():
                 "minimum": 20
             },
             "logging": True,
-            "plot_filename": "plot"
+            "plot_filename": "plot",
+            "random_seed": False
         }
 
         # holds config loaded from file
@@ -182,5 +183,17 @@ class Config():
             logging.error('config: plot filename must be a string')
             raise ValueError('plot filename must be a string')
         return string
+
+    def get_random_seed(self) -> int | bool:
+        """return the seed for random number generation"""
+        self.load()
+        seed = self.config['random_seed']
+
+        # data validation
+        if isinstance(seed, int) or isinstance(seed, bool):
+            return seed
+        else:
+            logging.error('config: random seed must be of type int or bool')
+            raise ValueError('config: random seed must be of type int or bool')
 
 config = Config()
