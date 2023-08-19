@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from zipfile import ZipFile
 from io import BytesIO
+import logging
 
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse, StreamingResponse
@@ -20,6 +21,8 @@ app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+logging.basicConfig(filename='logfile.log', level=logging.INFO, encoding='utf-8')
+
 def create_request_id():
     timestamp = int(time.time() * 1000)
     random_part = random.randint(0, 999999)
@@ -28,6 +31,7 @@ def create_request_id():
 
 @app.get('/')
 async def read_root():
+    logging.info('called read_root')
     return {
         'info': """Welcome to the API of the tree-growth-simulator project.
         Please note that this API is rate limited to 2 generation requests per minute.
@@ -36,6 +40,7 @@ async def read_root():
 
 @app.get('/github')
 async def redirect_to_github():
+    logging.info('called redirect_to_github')
     return RedirectResponse('https://github.com/philipp-schuetz/tree-growth-simulator')
 
 @app.put('/generate')
@@ -49,6 +54,7 @@ async def generate_model(
     random_seed:int|bool=False
     ):
     request_id = create_request_id()
+    logging.info(f'called generate with: {mod_light}, {mod_water}, {mod_temperature}, {mod_nutrients}, {light_sides_front}, {light_sides_back}, {light_sides_left}, {light_sides_right}, {light_sides_top}, {leafes}, {random_seed}, request_id: {request_id}')
     light_sides = [
         light_sides_front, light_sides_back, light_sides_left, light_sides_right, light_sides_top
         ]
@@ -74,5 +80,7 @@ async def generate_model(
 
     response = StreamingResponse(iter([buffer.getvalue()]), media_type="application/x-zip-compressed")
     response.headers["Content-Disposition"] = f'attachment; filename={zip_name}'
+
+    logging.info(f'finished zip file creation in api ({request_id})')
 
     return response
