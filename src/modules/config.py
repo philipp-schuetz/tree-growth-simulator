@@ -27,7 +27,7 @@ class Config():
                 "width": 249,
                 "height": 498
             },
-            "visualisation": {
+            "visualization": {
                 "add_leafs": True
             },
             "material_colors": {
@@ -145,7 +145,7 @@ class Config():
     def get_add_leafs(self) -> bool:
         """return True if model should use leafs, else return False"""
         self.load()
-        boolean = self.config['visualisation']['add_leafs']
+        boolean = self.config['visualization']['add_leafs']
 
         # data validation
         if not isinstance(boolean, bool):
