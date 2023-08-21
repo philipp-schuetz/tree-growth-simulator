@@ -27,6 +27,8 @@ class Model:
 
         self.random_seed = config.get_random_seed()
 
+        self.save_array = config.get_save_array_enabled()
+
         # create array for tree model
         self.model = np.zeros((self.width, self.height, self.width))
 
@@ -117,9 +119,9 @@ class Model:
         """set the seed for random numbers from the api"""
         self.random_seed = seed
 
-    def save(self):
-        """save model in file"""
-        np.save('../saves/lightarr.npy', self.model)
+    def save_array_to_file(self):
+        """save model to file"""
+        np.save('model_array.npy', self.model)
 
 
     # ---------------- model generation ----------------
@@ -407,6 +409,9 @@ class Model:
 
         self.model_generated += 1
         logging.info('model generation has finished')
+
+        if self.save_array:
+            self.save_array_to_file()
 
     # ---------------- display model ----------------
     def mathplotlib_plot(self, save:bool = False, filename:str = 'out', api:bool = False):

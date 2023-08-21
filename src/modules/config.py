@@ -48,7 +48,8 @@ class Config():
             },
             "logging": True,
             "plot_filename": "plot",
-            "random_seed": False
+            "random_seed": False,
+            "save_array": False
         }
 
         # holds config loaded from file
@@ -195,5 +196,16 @@ class Config():
         else:
             logging.error('config: random seed must be of type int or bool')
             raise ValueError('config: random seed must be of type int or bool')
+
+    def get_save_array_enabled(self) -> bool:
+        """return True if array saving is enabled in config, else return False"""
+        self.load()
+        boolean = self.config['save_array']
+
+        # data validation
+        if not isinstance(boolean, bool):
+            logging.error('config: save_array value must be a boolean')
+            raise ValueError('save_array value must be a boolean')
+        return boolean
 
 config = Config()
