@@ -61,7 +61,7 @@ By changing the width and height of the model, the size of the 3D array is chang
 ```
 
 ### Visualization
-With the visualization options the material colors
+With the visualization options, the material colors used for plotting and the filename of the plot images can be changed.
 ```json
 "visualization": {
     "material_colors": {
@@ -83,7 +83,7 @@ This setting can be used to better control the behavior of the different modifie
 
 ### Miscellaneous
 The `logging` value can be changed to either enable or disable logging.</br>
-The value of `random_seed` can be set to `false` or `any integer`. If the value is set to an integer, it is used as the seed for any random number generator in the programm. When set to false, the system time is used as the seed.
+The value of `random_seed` can be set to `false` or `any integer`. If the value is set to an integer, it is used as the seed for any random number generator in the program. When set to false, the system time is used as the seed.
 When changing the boolean value of `save_array` to `true` the array created on runtime is saved to a file, `model_array.npy` by default.
 ```json
 "logging": true
