@@ -27,7 +27,7 @@ If image creation is enabled, the images are created when clicking the show butt
 ![ui screenshot](images/ui.png)
 
 ## Config
-With the help of the config file, even more settings can be adapted to your needs. The default configuration will be created on application startup in config.json.
+With the help of the config file, even more settings can be adapted to your needs. The default configuration will be created on application startup in `config.json`. After an update, you might want to backup your current configuration and regenerate it by starting the updated app to get the newest configuration options.
 
 ### Material ID
 The material id is the number used to identify each material in the numpy model array.
@@ -90,8 +90,6 @@ When changing the boolean value of `save_array` to `true` the array created on r
 "random_seed": false
 "save_array": false
 ```
-
-After an update, you might want to backup your current configuration and regenerate it by starting the updated app to get the newest configuration options.
 
 ## Logging
 If logging is enabled in the configuration file, certain events are logged to a file. This file is called `logfile.log` by default. These events can include information about a finished process or error messages. This information is mainly used for debugging.
