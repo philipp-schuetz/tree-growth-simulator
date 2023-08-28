@@ -17,7 +17,7 @@ Run:
 The API provides a web interface for generating the tree models.
 A local installation of the tree-growth-simulator is therefore not required.
 </br>
-Visit the API docs here: [tgs.philippschuetz.com/docs](tgs.philippschuetz.com/docs)
+Visit the API docs here: [https://tgs.philippschuetz.com/docs](https://tgs.philippschuetz.com/docs)
 
 ## Graphical User Interface
 Through the GUI, you can set the intensity of environmental factors, toggle the leaf generation and image creation of the results, start the simulation and show its results.
