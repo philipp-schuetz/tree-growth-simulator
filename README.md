@@ -20,7 +20,7 @@ A local installation of the tree-growth-simulator is therefore not required.
 Visit the API docs here: [https://tgs.philippschuetz.com/docs](https://tgs.philippschuetz.com/docs)
 
 ## Graphical User Interface
-Through the GUI, you can set the intensity of environmental factors, toggle the leaf generation and image creation of the results, start the simulation and show its results.
+Through the GUI, you can set the intensity of environmental factors, image creation of the results, start the simulation and show its results.
 If image creation is enabled, the images are created when clicking the show button and saved in a folder named plots.
 
 ### Example image of the GUI:
@@ -65,7 +65,6 @@ With the visualization options, the material colors used for plotting and the fi
 ```json
 "visualization": {
     "material_colors": {
-        "leaf": "green",
         "wood": "brown"
     },
     "plot_filename": "plot"
