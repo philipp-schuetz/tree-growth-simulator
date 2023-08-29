@@ -6,41 +6,53 @@ on:
       - stable
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        platform: [windows, macos, linux]
+  build_windows:
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
-
-      - name: Install PyInstaller
-        run: pip install pyinstaller
-
-      - name: Install default dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install api dependencies
-        run: pip install -r requirements_api.txt
-
-      - name: Build Package
-        run: |
-          pyinstaller src/main.py --name tgs --onefile --clean --noconsole
-
       - name: Archive Package
         run: |
-          zip -r "tgs_${{ matrix.platform }}.zip" ./dist/tgs
+          zip -r "tgs_windows.zip" ./dist/tgs
 
       - name: Upload Package
         uses: actions/upload-artifact@v2
         with:
-          name: tgs_${{ matrix.platform }}
-          path: "./tgs_${{ matrix.platform }}.zip"
+          name: tgs_windows
+          path: "./tgs_windows.zip"
+
+  build_macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Archive Package
+        run: |
+          zip -r "tgs_macos.zip" ./dist/tgs
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: tgs_macos
+          path: "./tgs_macos.zip"
+
+  build_linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Archive Package
+        run: |
+          zip -r "tgs_linux.zip" ./dist/tgs
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: tgs_linux
+          path: "./tgs_linux.zip"
