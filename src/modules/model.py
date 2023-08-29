@@ -1,5 +1,7 @@
 import random
 import logging
+from pathlib import Path
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from modules.config import config
@@ -18,6 +20,14 @@ class Model:
         self.id_leaf = ids['leaf']
         self.id_wood = ids['wood']
         self.id_wall = ids['wall']
+
+        colors = config.get_material_colors()
+        self.color_wood = colors['wood']
+        self.color_leaf = self.color_wood
+
+        self.random_seed = config.get_random_seed()
+
+        self.save_array = config.get_save_array_enabled()
 
         # create array for tree model
         self.model = np.zeros((self.width, self.height, self.width))
@@ -53,9 +63,12 @@ class Model:
         self.activated_sides = ['front','back','left','right','top']
 
         self.leaf_generation = False
+        self.save_to_image = False
 
         # increases after model has finished generating to prevent generation of multiple models in one array
-        self.model_generated += 0
+        self.model_generated = 0
+
+        self.api_id = ''
 
 
     def set_minimum_values(self):
@@ -76,10 +89,14 @@ class Model:
                 to_remove.append(self.activated_sides[i])
         for item in to_remove:
             self.activated_sides.remove(item)
-    
+
     def set_leaf_generation(self, status:bool):
         """set whether leaf generation is enabled"""
         self.leaf_generation = status
+
+    def set_save_to_image(self, status:bool):
+        """set whether save to image is enabled"""
+        self.save_to_image = status
 
     def set_dimensions(self):
         'fetch and set model dimensions from config file'
@@ -94,9 +111,17 @@ class Model:
         self.temperature = temperature
         self.nutrients = nutrients
 
-    def save(self):
-        """save model in file"""
-        np.save('../saves/lightarr.npy', self.model)
+    def set_api_id(self, api_id:str):
+        """set the api call id"""
+        self.api_id = api_id
+
+    def set_random_seed(self, seed:int|bool):
+        """set the seed for random numbers from the api"""
+        self.random_seed = seed
+
+    def save_array_to_file(self):
+        """save model to file"""
+        np.save('model_array.npy', self.model)
 
 
     # ---------------- model generation ----------------
@@ -119,7 +144,7 @@ class Model:
         except IndexError:
             pass
 
-    def is_next_to(self, material_id:int) -> bool: # TODO check if method is working properly
+    def is_next_to(self, material_id:int) -> bool:
         """return True if voxel has given material next to it"""
         coordinates = self.position
         out = False
@@ -142,7 +167,6 @@ class Model:
             # right
             if self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
                 out = True
-            out = False
         except IndexError:
             out = False
         return out
@@ -273,9 +297,11 @@ class Model:
 
     def generate_model(self):
         """main method for tree structure generation"""
-        # reset contents of model when generation without restarting the app
+        # reset model and positioning when generation without restarting the app
         if self.model_generated > 0:
             self.model = np.zeros((self.width, self.height, self.width))
+            self.current_direction = 0
+            self.position = self.start_position.copy()
         logging.info('starting model generation')
         self.radius = 5 # start_radius
         branch_length = 20
@@ -323,6 +349,13 @@ class Model:
         branching_position.append(self.position)
         branching_radius.append(self.radius)
 
+        # set random seed
+        if isinstance(self.random_seed, bool):
+            random.seed()
+        elif isinstance(self.random_seed, int):
+            random.seed(self.random_seed)
+            print(self.random_seed)
+
         for i in range(iterations):
             random.shuffle(branching_position)
             for bp in range(len(branching_position)):
@@ -347,10 +380,14 @@ class Model:
                         if not self.light_minimum_reached():
                             break
                         self.place_voxel()
-                        for du in range(random.randrange(8)):
+                        for pu in range(random.randrange(8)):
                             self.up()
-                        for dd in range(random.randrange(4)):
+                        for pd in range(random.randrange(4)):
                             self.down()
+                        for pl in range(random.randrange(1)):
+                            self.left()
+                        for pr in range(random.randrange(1)):
+                            self.right()
                         self.set_radius(-1)
                     # save branch end
                     branching_position_tmp.append(self.position)
@@ -362,7 +399,7 @@ class Model:
             branching_radius_tmp = []
 
         if self.leaf_generation:
-            logging.info('starting leaf generation')
+            logging.info('starting leaf generation')# green voxels are generated at the top of the model
             # ---- generate leaves ---- # check thickness of wood
             for layer in range(0, self.width):
                 for row in range(0, int(self.height-min_branching_height)): # start leaf generation on branching height
@@ -372,13 +409,23 @@ class Model:
                         if self.is_next_to(self.id_wood) and self.light_minimum_reached():
                             # add leaf
                             self.model[layer,row,voxel] = self.id_leaf
-        
+
         self.model_generated += 1
         logging.info('model generation has finished')
 
+        if self.save_array:
+            self.save_array_to_file()
+
     # ---------------- display model ----------------
-    def mathplotlib_plot(self):
+    def mathplotlib_plot(self, save:bool = False, filename:str = 'out', api:bool = False):
         """generate a 3d plot to visualize the tree model"""
+
+        if self.save_to_image or save:
+            if filename == 'out':
+                filename = config.get_plot_filename()
+            # create output directory if it doesnt exist
+            if not os.path.exists('plots'):
+                os.makedirs('plots')
 
         if not self.leaf_generation:
             x = 1
@@ -400,9 +447,9 @@ class Model:
                 x1, y1, z1 = np.where(self.model == self.id_leaf)
 
             # plot voxels with correct orientation
-            ax.scatter(x, z, -y, c=((105,75,55)), marker='s')
+            ax.scatter(x, z, -y, color=self.color_wood, marker='s')
             if i == 1:
-                ax.scatter(x1, z1, -y1, c=((95,146,106)), marker='s')
+                ax.scatter(x1, z1, -y1, color=self.color_leaf, marker='s')
 
             # Set the limits for the axes
             ax.set_xlim(0, self.model.shape[0])
@@ -414,5 +461,8 @@ class Model:
             ax.set_ylabel('Z')
             ax.set_zlabel('Y')
 
-        # Show the plot(s)
-        plt.show()
+            if save or self.save_to_image:
+                file_path = Path(f'plots/{filename}_{i+1}.png')
+                plt.savefig(file_path)
+        if not api:
+            plt.show()

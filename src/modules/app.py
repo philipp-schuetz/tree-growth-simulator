@@ -1,7 +1,7 @@
 """Module contains the App class."""
+import logging
 from modules import ui
 from modules import model
-import logging
 
 class App:
     """App contains ui, model and light objects and the mainloop of this application"""
@@ -23,6 +23,17 @@ class App:
                     )
                     self.model.set_light_sides(self.ui.get_light_sides())
                     self.model.set_leaf_generation(self.ui.get_leaf_generation())
+                    self.model.set_save_to_image(self.ui.get_save_to_image())
                     self.model.generate_model()
                 case 'show':
                     self.model.mathplotlib_plot()
+
+    def api_run(self, request_id:str, light:int, water:int, temperature:int, nutrients:int, leafes:bool, light_sides:list[bool], random_seed:int|bool):
+        """run main event loop for execution through api"""
+        self.model.set_modifiers(light, water, temperature, nutrients)
+        self.model.set_api_id(id)
+        self.model.set_light_sides(light_sides)
+        self.model.set_leaf_generation(leafes)
+        self.model.set_random_seed(random_seed)
+        self.model.generate_model()
+        self.model.mathplotlib_plot(True, request_id, True)

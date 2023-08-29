@@ -2,3 +2,7 @@
 .vscode
 *.pdf
 config.json
+plots
+.venv
+__pycache__
+model_array.npy
