@@ -178,11 +178,10 @@ class Config():
         seed = self.config['random_seed']
 
         # data validation
-        if isinstance(seed, int) or isinstance(seed, bool):
+        if isinstance(seed, (bool, int)):
             return seed
-        else:
-            logging.error('config: random seed must be of type int or bool')
-            raise ValueError('config: random seed must be of type int or bool')
+        logging.error('config: random seed must be of type int or bool')
+        raise ValueError('config: random seed must be of type int or bool')
 
     def get_save_array_enabled(self) -> bool:
         """return True if array saving is enabled in config, else return False"""

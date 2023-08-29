@@ -1,5 +1,5 @@
-import PySimpleGUI as sg
 import logging
+import PySimpleGUI as sg
 class Ui:
     """Ui class holds all ui elements"""
     def __init__(self) -> None:

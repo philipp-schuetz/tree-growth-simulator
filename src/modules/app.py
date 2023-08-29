@@ -1,7 +1,7 @@
 """Module contains the App class."""
+import logging
 from modules import ui
 from modules import model
-import logging
 
 class App:
     """App contains ui, model and light objects and the mainloop of this application"""

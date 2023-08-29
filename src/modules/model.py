@@ -111,9 +111,9 @@ class Model:
         self.temperature = temperature
         self.nutrients = nutrients
 
-    def set_api_id(self, id:str):
+    def set_api_id(self, api_id:str):
         """set the api call id"""
-        self.api_id = id
+        self.api_id = api_id
 
     def set_random_seed(self, seed:int|bool):
         """set the seed for random numbers from the api"""
@@ -380,10 +380,14 @@ class Model:
                         if not self.light_minimum_reached():
                             break
                         self.place_voxel()
-                        for du in range(random.randrange(8)):
+                        for pu in range(random.randrange(8)):
                             self.up()
-                        for dd in range(random.randrange(4)):
+                        for pd in range(random.randrange(4)):
                             self.down()
+                        for pl in range(random.randrange(1)):
+                            self.left()
+                        for pr in range(random.randrange(1)):
+                            self.right()
                         self.set_radius(-1)
                     # save branch end
                     branching_position_tmp.append(self.position)
