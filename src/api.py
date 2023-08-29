@@ -50,9 +50,9 @@ async def generate_model(
     mod_light: int=100, mod_water:int=100, mod_temperature:int=100, mod_nutrients:int=100,
     light_sides_front:bool=True, light_sides_back:bool=True, light_sides_left:bool=True,
     light_sides_right:bool=True, light_sides_top:bool=True,
-    leafes:bool=False,
     random_seed:int|bool=False
     ):
+    leafes = False # leaf generation feature is disabled by default
     request_id = create_request_id()
     logging.info(f'called generate with: {mod_light}, {mod_water}, {mod_temperature}, {mod_nutrients}, {light_sides_front}, {light_sides_back}, {light_sides_left}, {light_sides_right}, {light_sides_top}, {leafes}, {random_seed}, request_id: {request_id}')
     light_sides = [

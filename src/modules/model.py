@@ -22,8 +22,8 @@ class Model:
         self.id_wall = ids['wall']
 
         colors = config.get_material_colors()
-        self.color_leaf = colors['leaf']
         self.color_wood = colors['wood']
+        self.color_leaf = self.color_wood
 
         self.random_seed = config.get_random_seed()
 

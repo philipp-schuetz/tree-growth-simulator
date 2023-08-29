@@ -29,7 +29,6 @@ class Config():
             },
             "visualization": {
                 "material_colors": {
-                    "leaf": "green",
                     "wood": "brown"
                 },
                 "plot_filename": "plot"

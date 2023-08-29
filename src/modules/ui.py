@@ -43,11 +43,11 @@ class Ui:
                     sg.Text('Nutrients'),
                     sg.Slider(range=(0,200), default_value=100, key='nutrients', orientation='horizontal')
                 ],
+                # [
+                #     sg.Text('Leaf Generation'),
+                #     sg.Checkbox('', default=False, key='leaf-generation')
+                # ],
                 [
-                    sg.Text('Leaf Generation'),
-                    sg.Checkbox('', default=False, key='leaf-generation')
-                ],
-                                [
                     sg.Text('Save to Image'),
                     sg.Checkbox('', default=False, key='save-to-image')
                 ]
@@ -74,7 +74,7 @@ class Ui:
                 self.value_water = values['water']
                 self.value_temperature = values['temperature']
                 self.value_nutrients = values['nutrients']
-                self.value_leaf_generation = values['leaf-generation']
+                self.value_leaf_generation = False # values['leaf-generation']
                 self.value_save_to_image = values['save-to-image']
 
                 self.values_light_sides = [
