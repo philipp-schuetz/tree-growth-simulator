@@ -144,7 +144,7 @@ class Model:
         except IndexError:
             pass
 
-    def is_next_to(self, material_id:int) -> bool: # TODO check if method is working properly
+    def is_next_to(self, material_id:int) -> bool:
         """return True if voxel has given material next to it"""
         coordinates = self.position
         out = False
@@ -167,7 +167,6 @@ class Model:
             # right
             if self.model[coordinates[0],coordinates[1],coordinates[2]+1] == material_id:
                 out = True
-            out = False
         except IndexError:
             out = False
         return out
@@ -396,7 +395,7 @@ class Model:
             branching_radius_tmp = []
 
         if self.leaf_generation:
-            logging.info('starting leaf generation')
+            logging.info('starting leaf generation')# green voxels are generated at the top of the model
             # ---- generate leaves ---- # check thickness of wood
             for layer in range(0, self.width):
                 for row in range(0, int(self.height-min_branching_height)): # start leaf generation on branching height
