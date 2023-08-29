@@ -13,9 +13,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Install default dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install api dependencies
+        run: pip install -r requirements_api.txt
+
+      - name: Build Package
+        run: |
+          pyinstaller src/main.py --name tgs --onefile --clean --noconsole
+
       - name: Archive Package
         run: |
-          zip -r "tgs_windows.zip" ./dist/tgs
+          zip -r "tgs_windows.zip" ./dist
 
       - name: Upload Package
         uses: actions/upload-artifact@v2
@@ -30,9 +48,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Install default dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install api dependencies
+        run: pip install -r requirements_api.txt
+
+      - name: Build Package
+        run: |
+          pyinstaller src/main.py --name tgs --onefile --clean --noconsole
+
       - name: Archive Package
         run: |
-          zip -r "tgs_macos.zip" ./dist/tgs
+          zip -r "tgs_macos.zip" ./dist
 
       - name: Upload Package
         uses: actions/upload-artifact@v2
@@ -47,9 +83,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Install default dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install api dependencies
+        run: pip install -r requirements_api.txt
+
+      - name: Build Package
+        run: |
+          pyinstaller src/main.py --name tgs --onefile --clean --noconsole
+
       - name: Archive Package
         run: |
-          zip -r "tgs_linux.zip" ./dist/tgs
+          zip -r "tgs_linux.zip" ./dist
 
       - name: Upload Package
         uses: actions/upload-artifact@v2
