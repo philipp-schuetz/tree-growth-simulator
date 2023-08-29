@@ -37,7 +37,7 @@ jobs:
 
       - name: Archive Package
         run: |
-          zip -r "tgs_${{ matrix.platform }}.zip" ./dist/tgs`
+          zip -r "tgs_${{ matrix.platform }}.zip" ./dist/tgs
 
       - name: Upload Package
         uses: actions/upload-artifact@v2
