@@ -33,7 +33,7 @@ jobs:
 
       - name: Archive Package
         run: |
-          zip -r "tgs_windows.zip" ./dist
+          Compress-Archive -Path ./dist -DestinationPath "tgs_windows.zip"
 
       - name: Upload Package
         uses: actions/upload-artifact@v2
