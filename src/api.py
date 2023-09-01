@@ -33,9 +33,7 @@ def create_request_id():
 async def read_root():
     logging.info('called read_root')
     return {
-        'info': """Welcome to the API of the tree-growth-simulator project.
-        Please note that this API is rate limited to 2 generation requests per minute.
-        For more information see: https://github.com/philipp-schuetz/tree-growth-simulator"""
+        'info': "Welcome to the API of the tree-growth-simulator project. Please note that this API is rate limited to 2 generation requests per minute. For more information see: https://github.com/philipp-schuetz/tree-growth-simulator"
         }
 
 @app.get('/github')

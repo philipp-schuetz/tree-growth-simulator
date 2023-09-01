@@ -18,7 +18,9 @@ The API provides a web interface for generating the tree models.
 A local installation of the tree-growth-simulator is therefore not required.
 </br>
 Visit the API docs here: [https://tgs.philippschuetz.com/docs](https://tgs.philippschuetz.com/docs)
-
+</br>
+You can also host a version of the API yourself with Docker. Build the image with `docker build -t tgs-img .` and run the container with `docker run -p 80:80 tgs-img`.
+After the container is started, the docs can be accessed here: [http://127.0.0.1/docs](http://127.0.0.1/docs)
 ## Graphical User Interface
 Through the GUI, you can set the intensity of environmental factors, image creation of the results, start the simulation and show its results.
 If image creation is enabled, the images are created when clicking the show button and saved in a folder named plots.
