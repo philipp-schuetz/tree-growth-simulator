@@ -3,7 +3,7 @@ name: Build Packages
 on:
   push:
     branches:
-      - stable
+      - main
 
 jobs:
   build_windows:
