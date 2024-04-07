@@ -7,7 +7,7 @@ Just download the executable for your system from the [latest release](https://g
 
 ### Python (Version 3.11 is recommended)
 Setup:
-- `git clone -b stable https://github.com/philipp-schuetz/tree-growth-simulator`
+- `git clone https://github.com/philipp-schuetz/tree-growth-simulator`
 - `pip install -r requirements.txt`
 
 Run:
@@ -17,7 +17,7 @@ Run:
 The API provides a web interface for generating the tree models.
 A local installation of the tree-growth-simulator is therefore not required.
 </br>
-Visit the API docs here: [https://tgs.philippschuetz.com/docs](https://tgs.philippschuetz.com/docs)
+Visit the API docs here: [https://tgs.philippschuetz.com/docs](https://tgs.philippschuetz.com/docs) (this instance is no longer maintained)
 </br>
 You can also host a version of the API yourself with Docker. Build the image with `docker build -t tgs-img .` and run the container with `docker run -p 80:80 tgs-img`.
 After the container is started, the docs can be accessed here: [http://127.0.0.1/docs](http://127.0.0.1/docs)
